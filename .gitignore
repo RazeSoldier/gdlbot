@@ -1,0 +1,7 @@
+/.idea
+/.gradle
+/build
+/cache
+/config.json
+/deviceinfo.json
+/gradle/wrapper/gradle-wrapper.jar

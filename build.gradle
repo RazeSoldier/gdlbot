@@ -1,0 +1,38 @@
+plugins {
+    id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.5.10'
+    id "io.freefair.lombok" version "6.3.0"
+}
+
+group 'razesoldier'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api("net.mamoe:mirai-core-api:2.8.2")
+    runtimeOnly("net.mamoe:mirai-core:2.8.2")
+    implementation('com.alibaba:fastjson:1.2.78')
+    api("org.slf4j:slf4j-api:1.7.32")
+    runtimeOnly("org.slf4j:slf4j-simple:1.7.32")
+    implementation("org.jsoup:jsoup:1.14.3")
+    implementation("com.discord4j:discord4j-core:3.2.1")
+    implementation("com.tencentcloudapi:tencentcloud-sdk-java-tmt:3.1.407")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+}
+
+application {
+    mainClass = 'razesoldier.gdlbot.Entry'
+    applicationDefaultJvmArgs = ['-Dmirai.no-desktop']
+}
+
+jar {
+    System.out.println(configurations.runtimeClasspath)
+    manifest.attributes = ["Manifest-Version": archiveVersion, 'Main-Class': 'razesoldier.gdlbot.Entry']
+}
+
+test {
+    useJUnitPlatform()
+}
