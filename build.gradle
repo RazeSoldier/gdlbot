@@ -32,7 +32,6 @@ application {
 }
 
 jar {
-    System.out.println(configurations.runtimeClasspath)
     manifest.attributes = ["Manifest-Version": archiveVersion, 'Main-Class': 'razesoldier.gdlbot.Entry']
 }
 
