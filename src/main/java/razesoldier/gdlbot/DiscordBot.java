@@ -54,10 +54,11 @@ public class DiscordBot {
         Message message = event.getMessage();
         var serverName = Objects.requireNonNull(message.getGuild().block()).getName();
         var channelName = Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).block()).getName();
+        Services.getInstance().getLogger().info(() -> String.format("Received %s#%s: %s", serverName, channelName, message.getContent()));
 
         if (serverName.equals(discordRelayConfig.discordServer()) && discordRelayConfig.discordChannels().contains(channelName)) {
-            gdlBot.sendMessage(discordRelayConfig.downstreamGroup(),
-                    new PingNotification(channelName, getSenderName(message),message.getContent()).toString());
+            gdlBot.sendMessageToGroup(discordRelayConfig.downstreamGroup(),
+                    new PingNotification(channelName, getSenderName(message), message.getContent()).toString());
         }
     }
 

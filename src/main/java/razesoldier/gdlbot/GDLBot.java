@@ -43,6 +43,10 @@ class GDLBot {
         bot.getFriendOrFail(id).sendMessage(message);
     }
 
+    void sendMessageToGroup(Long id, String message) {
+        bot.getGroupOrFail(id).sendMessage(message);
+    }
+
     private void registerMessageSubscribe() {
         GlobalEventChannel.INSTANCE.filter(event -> {
             if (!(event instanceof MessageEvent)) {
