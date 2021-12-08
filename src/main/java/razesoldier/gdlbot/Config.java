@@ -19,6 +19,6 @@ public record Config(Account account, List<Long> messageSubscribeList, String ph
     public record Proxy(String host, Integer port) {
     }
 
-    public record DiscordRelay(String discordServer, List<String> discordChannels, Long downstreamGroup) {
+    public record DiscordRelay(String discordServer, List<String> discordChannels, List<Long> downstreamGroups) {
     }
 }
