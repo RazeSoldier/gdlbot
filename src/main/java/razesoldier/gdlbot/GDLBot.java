@@ -64,6 +64,10 @@ class GDLBot {
         });
     }
 
+    /**
+     * 从事件返回发送人。如果是群消息则返回{@link net.mamoe.mirai.contact.Group}，如果是私聊则返回{@link net.mamoe.mirai.contact.User}
+     * @param event 可能是群消息有可能是私聊
+     */
     @NotNull
     private Contact getSenderFromEvent(@NotNull MessageEvent event) {
         if (event instanceof GroupMessageEvent groupMessageEvent) {

@@ -10,6 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import razesoldier.gdlbot.translation.TranslateException;
 import razesoldier.gdlbot.translation.TranslatorFactory;
 
+/**
+ * Ping信息的构建器
+ */
 public class PingNotification {
     private final String channel;
     private final String sender;

@@ -51,6 +51,9 @@ public class DiscordBot {
         login.block();
     }
 
+    /**
+     * 处理{@link MessageCreateEvent}
+     */
     private void handleMessageCreateEvent(@NotNull MessageCreateEvent event) {
         Message message = event.getMessage();
         var serverName = Objects.requireNonNull(message.getGuild().block()).getName();
@@ -63,6 +66,10 @@ public class DiscordBot {
         }
     }
 
+    /**
+     * 从提供的{@link Message}获得此消息的发送人名称
+     * @return 尝试返回发送人的昵称，如果没有则返回其用户名
+     */
     @NotNull
     private String getSenderName(@NotNull Message message) {
         var member = message.getAuthorAsMember().block();

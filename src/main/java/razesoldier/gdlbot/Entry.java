@@ -18,6 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
+/**
+ * 本机器人的入口点
+ */
 public class Entry {
     public static void main(String[] args) {
         Logger logger = Logger.getLogger("GDLBot");

@@ -33,7 +33,6 @@ public class PandemicHordeWebsiteAccessor {
                 .uri(URI.create("https://www.pandemic-horde.org/events/upcoming/datatable"))
                 .header("cookie", cookie)
                 .build();
-        var resp = client.send(request, HttpResponse.BodyHandlers.ofString());
-        return resp.body();
+        return client.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }
 }

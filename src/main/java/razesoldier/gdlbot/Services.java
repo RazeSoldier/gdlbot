@@ -51,6 +51,9 @@ public final class Services {
         return logger;
     }
 
+    /**
+     * 初始化{@link Services}，必须在程序的入口调用
+     */
     public static void setup(Config config, Logger logger) {
         instance = new Services(config, logger);
     }

@@ -23,6 +23,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.logging.Logger;
 
+/**
+ * 处理`.event`命令
+ */
 class GetUpcomingEventCommand implements Command {
     private static final String SPLIT_LINE = "----------------\n";
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -86,6 +89,9 @@ class GetUpcomingEventCommand implements Command {
         contact.sendMessage(enMessage.append("腾讯云翻译：\n-----------------------\n").append(zhMessage).toString());
     }
 
+    /**
+     * 将HTML转换为纯文本
+     */
     @NotNull
     private String html2text(@NotNull String html) {
         return Jsoup.parse(html).text();
@@ -95,6 +101,9 @@ class GetUpcomingEventCommand implements Command {
         return Services.getInstance().getTranslator().translate(source);
     }
 
+    /**
+     * 翻译优先级
+     */
     private String translatePriority(String source) {
         source = source.toLowerCase();
         switch (source) {
