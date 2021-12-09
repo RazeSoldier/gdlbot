@@ -10,15 +10,10 @@ import discord4j.common.ReactorResources;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.GuildChannel;
 import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;
-
-import java.util.Objects;
 
 /**
  * 负责与Discord通讯的机器人
@@ -26,7 +21,6 @@ import java.util.Objects;
 public class DiscordBot {
     private final DiscordClient client;
     private GDLBot gdlBot;
-    private final Config.DiscordRelay discordRelayConfig;
 
     public DiscordBot(@NotNull Config config) {
         final var proxy = config.proxy();
@@ -40,40 +34,14 @@ public class DiscordBot {
                                 )
                 ).build();
         client = DiscordClientBuilder.create(config.discordBotToken()).setReactorResources(resources).build();
-        discordRelayConfig = config.discordRelay();
     }
 
     public void run() {
         Mono<Void> login = client.withGateway(gateway ->
-                gateway.on(MessageCreateEvent.class, event -> Mono.fromRunnable(() -> handleMessageCreateEvent(event)))
+                gateway.on(MessageCreateEvent.class, event -> Mono.fromRunnable(() -> new MessageCreateEventHandler(event, gdlBot)))
         );
 
         login.block();
-    }
-
-    /**
-     * 处理{@link MessageCreateEvent}
-     */
-    private void handleMessageCreateEvent(@NotNull MessageCreateEvent event) {
-        Message message = event.getMessage();
-        var serverName = Objects.requireNonNull(message.getGuild().block()).getName();
-        var channelName = Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).block()).getName();
-        Services.getInstance().getLogger().info(() -> String.format("Received %s#%s: %s", serverName, channelName, message.getContent()));
-
-        if (serverName.equals(discordRelayConfig.discordServer()) && discordRelayConfig.discordChannels().contains(channelName)) {
-            var pendingMessage = new PingNotification(channelName, getSenderName(message), message.getContent()).toString();
-            Flux.fromIterable(discordRelayConfig.downstreamGroups()).subscribe(group -> gdlBot.sendMessageToGroup(group, pendingMessage));
-        }
-    }
-
-    /**
-     * 从提供的{@link Message}获得此消息的发送人名称
-     * @return 尝试返回发送人的昵称，如果没有则返回其用户名
-     */
-    @NotNull
-    private String getSenderName(@NotNull Message message) {
-        var member = message.getAuthorAsMember().block();
-        return Objects.requireNonNull(member).getNickname().orElseGet(member::getUsername);
     }
 
     public void setGDLBot(GDLBot gdlBot) {
