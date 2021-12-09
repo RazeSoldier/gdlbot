@@ -36,7 +36,9 @@ public class MessageCreateEventHandler implements Runnable {
         Services.getInstance().getLogger().info(() -> String.format("Received %s#%s: %s", serverName, channelName, message.getContent()));
 
         if (serverName.equals(discordRelayConfig.discordServer()) && discordRelayConfig.discordChannels().contains(channelName)) {
-            var pendingMessage = new PingNotification(channelName, getSenderName(message), message.getContent()).toString();
+            var pendingMessage = new PingNotification(channelName,
+                    getSenderName(message),
+                    normalizedMessageContent(message.getContent())).toString();
             Flux.fromIterable(discordRelayConfig.downstreamGroups()).subscribe(group -> gdlBot.sendMessageToGroup(group, pendingMessage));
         }
     }
@@ -49,5 +51,13 @@ public class MessageCreateEventHandler implements Runnable {
     private String getSenderName(@NotNull Message message) {
         var member = message.getAuthorAsMember().block();
         return Objects.requireNonNull(member).getNickname().orElseGet(member::getUsername);
+    }
+
+    /**
+     * 规范化消息内容（去掉内容里的特殊字符）
+     */
+    @NotNull
+    private static String normalizedMessageContent(@NotNull String content) {
+        return content.replaceAll("<a?:.*?:[0-9]*>", "");
     }
 }
