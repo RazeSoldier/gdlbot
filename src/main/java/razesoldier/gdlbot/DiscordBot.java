@@ -38,7 +38,7 @@ public class DiscordBot {
 
     public void run() {
         Mono<Void> login = client.withGateway(gateway ->
-                gateway.on(MessageCreateEvent.class, event -> Mono.fromRunnable(() -> new MessageCreateEventHandler(event, gdlBot)))
+                gateway.on(MessageCreateEvent.class, event -> Mono.fromRunnable(new MessageCreateEventHandler(event, gdlBot)))
         );
 
         login.block();
