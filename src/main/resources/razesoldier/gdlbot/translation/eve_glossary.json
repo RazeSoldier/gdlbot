@@ -1,6 +1,7 @@
 {
   "HML": "重导",
   "HML FITS": "重导配置",
+  "Scimis": "曲剑",
   "Scimitar": "曲剑",
   "Scimitars": "曲剑",
   "Recons": "侦查舰",
@@ -26,9 +27,15 @@
   "Svipuls": "斯威普",
   "Osprey": "鱼鹰",
   "Caracal": "狞獾",
+  "Caracals": "狞獾",
   "BOOSHERS": "跳驱",
   "boosher": "跳驱",
   "booshers": "跳驱",
   "ansi": "跳桥",
-  "logi": "后勤"
+  "logi": "后勤",
+  "Muninns": "缪宁",
+  "Muninn": "缪宁",
+  "Links": "加成",
+  "tackle": "抓人",
+  "formup": "集结"
 }
