@@ -109,13 +109,13 @@ class GetUpcomingEventCommand implements Command {
         switch (source) {
             case "normal":
                 return "普通";
-            case "krab pen":
+            case "krab-pen":
                 return "绿色";
-            case "hype pen":
+            case "hype-pen":
                 return "金色";
-            case "red pen":
+            case "red-pen":
                 return "红色";
-            case "pink pen":
+            case "pink-pen":
                 return "粉色";
             default:
                 var tempSource = source;
