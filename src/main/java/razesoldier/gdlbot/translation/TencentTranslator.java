@@ -28,6 +28,7 @@ class TencentTranslator implements Translator {
         req.setSource("en");
         req.setTarget("zh");
         req.setProjectId(projectId);
+        req.setUntranslatedText("CCP"); // 不要翻译CCP
         try {
             return client.TextTranslate(req).getTargetText();
         } catch (TencentCloudSDKException e) {
