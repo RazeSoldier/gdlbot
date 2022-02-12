@@ -8,9 +8,12 @@ package razesoldier.gdlbot;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Contact;
+import net.mamoe.mirai.contact.Friend;
+import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
+import net.mamoe.mirai.message.MessageReceipt;
 import org.jetbrains.annotations.NotNull;
 import razesoldier.gdlbot.command.Command;
 import razesoldier.gdlbot.command.CommandFactory;
@@ -39,12 +42,12 @@ class GDLBot {
         registerMessageSubscribe();
     }
 
-    void sendMessage(Long id, String message) {
-        bot.getFriendOrFail(id).sendMessage(message);
+    MessageReceipt<Friend> sendMessage(Long id, String message) {
+        return bot.getFriendOrFail(id).sendMessage(message);
     }
 
-    void sendMessageToGroup(Long id, String message) {
-        bot.getGroupOrFail(id).sendMessage(message);
+    MessageReceipt<Group> sendMessageToGroup(Long id, String message) {
+        return bot.getGroupOrFail(id).sendMessage(message);
     }
 
     private void registerMessageSubscribe() {

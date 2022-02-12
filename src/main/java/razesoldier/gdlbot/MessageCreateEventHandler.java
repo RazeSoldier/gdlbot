@@ -6,13 +6,17 @@
 
 package razesoldier.gdlbot;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.GuildChannel;
+import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.message.MessageReceipt;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 处理{@link MessageCreateEvent}
@@ -20,37 +24,53 @@ import java.util.Objects;
 public class MessageCreateEventHandler implements Runnable {
     private final MessageCreateEvent event;
     private final GDLBot gdlBot;
+    private final Map<Snowflake, List<MessageReceipt<Group>>> discordMsgMapQQMSg;
     private final Config.DiscordRelay discordRelayConfig;
 
-    public MessageCreateEventHandler(MessageCreateEvent event, GDLBot gdlBot) {
+    public MessageCreateEventHandler(MessageCreateEvent event, GDLBot gdlBot, Map<Snowflake, List<MessageReceipt<Group>>> discordMsgMapQQMSg) {
         this.event = event;
         this.gdlBot = gdlBot;
+        this.discordMsgMapQQMSg = discordMsgMapQQMSg;
         discordRelayConfig = Services.getInstance().getConfig().discordRelay();
     }
 
     @Override
     public void run() {
         Message message = event.getMessage();
-        var serverName = Objects.requireNonNull(message.getGuild().block()).getName();
-        var channelName = Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).block()).getName();
-        Services.getInstance().getLogger().info(() -> String.format("Received %s#%s: %s", serverName, channelName, message.getContent()));
-
-        if (serverName.equals(discordRelayConfig.discordServer()) && discordRelayConfig.discordChannels().contains(channelName)) {
-            var pendingMessage = new PingNotification(channelName,
-                    getSenderName(message),
-                    normalizedMessageContent(message.getContent())).toString();
-            Flux.fromIterable(discordRelayConfig.downstreamGroups()).subscribe(group -> gdlBot.sendMessageToGroup(group, pendingMessage));
-        }
+        List<MessageReceipt<Group>> messageReceipts = Collections.synchronizedList(new ArrayList<>());
+        Flux.zip(message.getGuild(), message.getChannel().ofType(GuildChannel.class), message.getAuthorAsMember())
+                .log()
+                .retry(2)
+                .doOnNext(tuple3 -> {
+                    // 记录日志
+                    String guildName = tuple3.getT1().getName();
+                    String channelName = tuple3.getT2().getName();
+                    Services.getInstance().getLogger().info(() -> String.format("Received %s#%s: %s", guildName, channelName, message.getContent()));
+                })
+                .filter(tuple3 -> {
+                    // 过滤请求。仅接受来自白名单服务器的消息
+                    String guildName = tuple3.getT1().getName();
+                    String channelName = tuple3.getT2().getName();
+                    return guildName.equals(discordRelayConfig.discordServer()) && discordRelayConfig.discordChannels().contains(channelName);
+                })
+                .doOnError(error -> gdlBot.sendMessage(getAdminContact(), "[MessageCreateEventHandler] " + error.getMessage()))
+                .doOnComplete(() -> discordMsgMapQQMSg.put(message.getId(), messageReceipts))
+                .subscribe(tuple3 -> {
+                    String channelName = tuple3.getT2().getName();
+                    Member sender = tuple3.getT3();
+                    var pendingMessage = new PingNotification(channelName,
+                            sender.getNickname().orElse(sender.getUsername()),
+                            normalizedMessageContent(message.getContent())).toString();
+                    Flux.fromIterable(discordRelayConfig.downstreamGroups()).subscribe(group -> {
+                        var receipt = gdlBot.sendMessageToGroup(group, pendingMessage);
+                        // 每当发送QQ群消息时记录消息回执，用于撤回消息
+                        messageReceipts.add(receipt);
+                    });
+                });
     }
 
-    /**
-     * 从提供的{@link Message}获得此消息的发送人名称
-     * @return 尝试返回发送人的昵称，如果没有则返回其用户名
-     */
-    @NotNull
-    private String getSenderName(@NotNull Message message) {
-        var member = message.getAuthorAsMember().block();
-        return Objects.requireNonNull(member).getNickname().orElseGet(member::getUsername);
+    private Long getAdminContact() {
+        return Services.getInstance().getConfig().adminContact();
     }
 
     /**
