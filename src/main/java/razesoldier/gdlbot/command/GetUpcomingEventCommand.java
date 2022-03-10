@@ -6,7 +6,6 @@
 
 package razesoldier.gdlbot.command;
 
-import com.alibaba.fastjson.JSON;
 import net.mamoe.mirai.contact.Contact;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
@@ -42,9 +41,9 @@ class GetUpcomingEventCommand implements Command {
 
     @Override
     public void execute() {
-        String upcomingEvents;
+        UpcomingEventsDatatableModel upcomingEvents;
         try {
-            upcomingEvents = new PandemicHordeWebsiteAccessor(cookie).getUpcomingEvents();
+            upcomingEvents = new PandemicHordeWebsiteAccessor(cookie).getUpcomingEvents().body().get();
         } catch (IOException e) {
             logger.warning(String.format("Can't access PH site, reason: %s", e.getMessage()));
             return;
@@ -57,8 +56,7 @@ class GetUpcomingEventCommand implements Command {
         StringBuilder enMessage = new StringBuilder();
         StringBuilder zhMessage = new StringBuilder();
         enMessage.append("即将到来的PH活动").append("\n").append(SPLIT_LINE);
-        JSON.parseObject(upcomingEvents, UpcomingEventsDatatableModel.class)
-                .data()
+        upcomingEvents.data()
                 .stream()
                 .map(data -> {
                     var time = ZonedDateTime.parse(html2text(data.start_time()), DATE_TIME_FORMATTER)

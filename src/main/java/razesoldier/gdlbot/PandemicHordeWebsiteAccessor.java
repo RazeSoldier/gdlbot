@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.function.Supplier;
 
 /**
  * 用于访问PH官网的访问器。可以模拟真实请求。
@@ -26,13 +27,13 @@ public class PandemicHordeWebsiteAccessor {
         this.cookie = cookie;
     }
 
-    public String getUpcomingEvents() throws IOException, InterruptedException {
+    public HttpResponse<Supplier<UpcomingEventsDatatableModel>> getUpcomingEvents() throws IOException, InterruptedException {
         var client = HttpClient.newHttpClient();
         var request = HttpRequest
                 .newBuilder()
                 .uri(URI.create("https://www.pandemic-horde.org/events/upcoming/datatable"))
                 .header("cookie", cookie)
                 .build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        return client.send(request, new JsonObjectBodyHandler<>(UpcomingEventsDatatableModel.class));
     }
 }
