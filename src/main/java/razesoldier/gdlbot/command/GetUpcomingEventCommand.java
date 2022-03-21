@@ -53,11 +53,16 @@ class GetUpcomingEventCommand implements Command {
             return;
         }
 
+        var eventList = upcomingEvents.data();
+        if (eventList.isEmpty()) {
+            contact.sendMessage("最近暂时没有活动");
+            return;
+        }
+
         StringBuilder enMessage = new StringBuilder();
         StringBuilder zhMessage = new StringBuilder();
         enMessage.append("即将到来的PH活动").append("\n").append(SPLIT_LINE);
-        upcomingEvents.data()
-                .stream()
+        eventList.stream()
                 .map(data -> {
                     var time = ZonedDateTime.parse(html2text(data.start_time()), DATE_TIME_FORMATTER)
                             .withZoneSameInstant(ZoneId.of("+8"))
