@@ -6,57 +6,43 @@
 
 package razesoldier.gdlbot.translation;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import razesoldier.gdlbot.Config;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Map;
-import java.util.Objects;
-
+/**
+ * {@link razesoldier.gdlbot.translation}包的API之一
+ */
 public class TranslatorFactory {
+    private static Injector injector;
+
     /**
      * 获得默认的翻译器
      */
     @NotNull
-    @Contract(value = "_ -> new", pure = true)
-    public static Translator make(@NotNull Config config) {
-        return makeTencentTranslator(config);
+    public static Translator make() {
+        return makeTencentTranslator();
     }
 
     @NotNull
-    @Contract("_ -> new")
-    public static TencentTranslator makeTencentTranslator(@NotNull Config config) {
-        return new TencentTranslator(config.tencentCred().secretId(), config.tencentCred().secretKey(),
-                config.tencentCred().region(), config.tencentCred().projectId());
+    public static TencentTranslator makeTencentTranslator() {
+        return getInjector().getInstance(TencentTranslator.class);
     }
 
     @NotNull
     @Contract(" -> new")
-    public static EVEProperNounsTranslator makeEVEProperNounsTranslator() throws TranslateException {
-        return new EVEProperNounsTranslator(getEveGlossary());
+    public static EVEProperNounsTranslator makeEVEProperNounsTranslator() {
+        return getInjector().getInstance(EVEProperNounsTranslator.class);
     }
 
-    private TranslatorFactory() {}
-
-    private static Map<String, String> getEveGlossary() throws TranslateException {
-        InputStream inputStream = TranslatorFactory.class.getResourceAsStream("eve_glossary.json");
-
-        StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream)))) {
-            String line;
-            while ((line = in.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-        } catch (IOException e) {
-            throw new TranslateException(e);
+    private static Injector getInjector() {
+        if (injector == null) {
+            injector = Guice.createInjector(new TranslatorModule());
         }
+        return injector;
+    }
 
-        return JSON.parseObject(stringBuilder.toString(), new TypeReference<>() {});
+    private TranslatorFactory() {
     }
 }

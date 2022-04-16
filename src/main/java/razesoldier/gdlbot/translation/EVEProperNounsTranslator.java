@@ -6,6 +6,7 @@
 
 package razesoldier.gdlbot.translation;
 
+import com.google.inject.Inject;
 import org.atteo.evo.inflector.English;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,8 +19,9 @@ import java.util.concurrent.atomic.AtomicReference;
 class EVEProperNounsTranslator implements Translator {
     private final Map<String, String> glossary;
 
-    EVEProperNounsTranslator(Map<String, String> glossary) {
-        this.glossary = glossary;
+    @Inject
+    EVEProperNounsTranslator(@NotNull @TranslatorModule.Glossary GlossaryProvider glossaryProvider) throws TranslateException {
+        this.glossary = glossaryProvider.get();
     }
 
     @Override

@@ -7,7 +7,6 @@
 package razesoldier.gdlbot;
 
 import org.jetbrains.annotations.NotNull;
-import razesoldier.gdlbot.translation.TranslateException;
 import razesoldier.gdlbot.translation.TranslatorFactory;
 
 /**
@@ -25,27 +24,21 @@ public class PingNotification {
     }
 
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
         /*
             # pings
             FC: Formup in R1O
             Fleetname: xxx
          */
-        stringBuilder.append("# ").append(channel).append(":\n").append(sender).append(": ").append(text).append("\n");
-        try {
-            stringBuilder.append("---------------------").append("\n").append(translate(text));
-        } catch (TranslateException e) {
-            Services.getInstance().getLogger().warning(e.getMessage());
-        }
-        return stringBuilder.toString();
+        return "# " + channel + ":\n" + sender + ": " + text + "\n" +
+                "---------------------" + "\n" + translate(text);
     }
 
     @NotNull
-    private String translate(@NotNull String source) throws TranslateException {
+    private String translate(@NotNull String source) {
         return Services.getInstance()
                 .getTranslationPipeline()
                 .addTranslator(TranslatorFactory.makeEVEProperNounsTranslator())
-                .addTranslator(TranslatorFactory.makeTencentTranslator(Services.getInstance().getConfig()))
+                .addTranslator(TranslatorFactory.makeTencentTranslator())
                 .translate(source);
     }
 }

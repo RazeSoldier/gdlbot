@@ -32,7 +32,7 @@ public final class Services {
     @NotNull
     @Contract(value = " -> new", pure = true)
     public Translator getTranslator() {
-        return TranslatorFactory.make(config);
+        return TranslatorFactory.make();
     }
 
     /**

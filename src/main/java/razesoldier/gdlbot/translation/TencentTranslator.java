@@ -6,19 +6,23 @@
 
 package razesoldier.gdlbot.translation;
 
+import com.google.inject.Inject;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.tmt.v20180321.TmtClient;
 import com.tencentcloudapi.tmt.v20180321.models.TextTranslateRequest;
+import org.jetbrains.annotations.NotNull;
+import razesoldier.gdlbot.Config;
 
 class TencentTranslator implements Translator {
     private final TmtClient client;
     private final Long projectId;
 
-    TencentTranslator(String secretId, String secretKey, String region, Long projectId) {
-        Credential cred = new Credential(secretId, secretKey);
-        client = new TmtClient(cred, region);
-        this.projectId = projectId;
+    @Inject
+    TencentTranslator(@NotNull @TranslatorModule.TencentCredential Config.TencentCredential credential) {
+        Credential cred = new Credential(credential.secretId(), credential.secretKey());
+        client = new TmtClient(cred, credential.region());
+        this.projectId = credential.projectId();
     }
 
     @Override

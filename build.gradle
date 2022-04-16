@@ -20,6 +20,8 @@ dependencies {
     implementation('com.alibaba:fastjson:1.2.79')
     api('org.slf4j:slf4j-api:1.7.36')
     runtimeOnly('org.slf4j:slf4j-simple:1.7.36')
+    implementation('com.google.inject:guice:5.1.0')
+    implementation('com.google.inject.extensions:guice-throwingproviders:5.1.0')
     implementation("org.jsoup:jsoup:1.14.3")
     implementation('com.discord4j:discord4j-core:3.2.2')
     implementation('com.tencentcloudapi:tencentcloud-sdk-java-tmt:3.1.457')
