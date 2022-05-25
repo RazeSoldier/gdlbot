@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'razesoldier'
-version '1.5'
+version '1.6'
 
 targetCompatibility = JavaVersion.VERSION_17
 sourceCompatibility = JavaVersion.VERSION_17
@@ -15,16 +15,16 @@ repositories {
 }
 
 dependencies {
-    api('net.mamoe:mirai-core-api:2.10.1')
-    runtimeOnly("net.mamoe:mirai-core:2.10.1")
-    implementation('com.alibaba:fastjson:1.2.80')
+    api('net.mamoe:mirai-core-api:2.11.0')
+    runtimeOnly("net.mamoe:mirai-core:2.11.0")
+    implementation('com.alibaba:fastjson:1.2.83')
     api('org.slf4j:slf4j-api:1.7.36')
     runtimeOnly('org.slf4j:slf4j-simple:1.7.36')
     implementation('com.google.inject:guice:5.1.0')
     implementation('com.google.inject.extensions:guice-throwingproviders:5.1.0')
     implementation("org.jsoup:jsoup:1.14.3")
     implementation('com.discord4j:discord4j-core:3.2.2')
-    implementation('com.tencentcloudapi:tencentcloud-sdk-java-tmt:3.1.488')
+    implementation('com.tencentcloudapi:tencentcloud-sdk-java-tmt:3.1.507')
     implementation("org.atteo:evo-inflector:1.3")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 }
