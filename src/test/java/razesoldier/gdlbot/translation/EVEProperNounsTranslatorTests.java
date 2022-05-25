@@ -9,6 +9,7 @@ package razesoldier.gdlbot.translation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import razesoldier.gdlbot.Services;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class EVEProperNounsTranslatorTests {
     @Test
     void testBasic() throws TranslateException {
+        Services.setup(null, null);
         var translator = getInstance();
         assertEquals("重导", translator.translate("HML"));
         assertEquals("重导 小希", translator.translate("HML Cerberus"));
