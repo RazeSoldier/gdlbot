@@ -80,6 +80,6 @@ public class MessageCreateEventHandler implements Runnable {
      */
     @NotNull
     private static String normalizedMessageContent(@NotNull String content) {
-        return content.replaceAll("<a?:.*?:[0-9]*>", "");
+        return content.replaceAll("<a?:.*?:\\d*>", "");
     }
 }
