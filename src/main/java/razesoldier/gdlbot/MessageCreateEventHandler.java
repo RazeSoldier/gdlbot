@@ -51,14 +51,16 @@ public class MessageCreateEventHandler implements Runnable {
                     // 过滤请求。仅接受来自白名单服务器的消息
                     String guildName = tuple3.getT1().getName();
                     String channelName = tuple3.getT2().getName();
-                    return guildName.equals(discordRelayConfig.discordServer()) && discordRelayConfig.discordChannels().contains(channelName);
+                    return discordRelayConfig.discordServers().contains(guildName) && discordRelayConfig.discordChannels().contains(channelName);
                 })
                 .doOnError(error -> gdlBot.sendMessage(getAdminContact(), "[MessageCreateEventHandler] " + error.getMessage()))
                 .doOnComplete(() -> discordMsgMapQQMSg.put(message.getId(), messageReceipts))
                 .subscribe(tuple3 -> {
+                    String guildName = tuple3.getT1().getName();
                     String channelName = tuple3.getT2().getName();
                     Member sender = tuple3.getT3();
-                    var pendingMessage = new PingNotification(channelName,
+                    var pendingMessage = new PingNotification(guildName,
+                            channelName,
                             sender.getNickname().orElse(sender.getUsername()),
                             normalizedMessageContent(message.getContent())).toString();
                     Flux.fromIterable(discordRelayConfig.downstreamGroups()).subscribe(group -> {

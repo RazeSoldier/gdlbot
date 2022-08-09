@@ -13,11 +13,13 @@ import razesoldier.gdlbot.translation.TranslatorFactory;
  * Ping信息的构建器
  */
 public class PingNotification {
+    private final String server;
     private final String channel;
     private final String sender;
     private final String text;
 
-    public PingNotification(String channel, String sender, String text) {
+    public PingNotification(String server, String channel, String sender, String text) {
+        this.server = server;
         this.channel = channel;
         this.sender = sender;
         this.text = text;
@@ -25,12 +27,11 @@ public class PingNotification {
 
     public String toString() {
         /*
-            # pings
+            ⊙ Horde DEF # pings
             FC: Formup in R1O
             Fleetname: xxx
          */
-        return "# " + channel + ":\n" + sender + ": " + text + "\n" +
-                "---------------------" + "\n" + translate(text);
+        return String.format("⊙ %s # %s:%n%s: %s%n---------------------%n%s", server, channel, sender, text, translate(text));
     }
 
     @NotNull
