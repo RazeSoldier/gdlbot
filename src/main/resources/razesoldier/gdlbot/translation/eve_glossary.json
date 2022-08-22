@@ -6,6 +6,8 @@
   "recon": "侦查舰",
   "cerberus": "小希",
   "AUTZ": "澳洲时区",
+  "EUTZ": "欧洲时区",
+  "USTZ": "美洲时区",
   "doctrine": "优先级",
   "Cmd Destroyer": "指挥驱逐",
   "dictor": "轻拦",
@@ -49,11 +51,13 @@
   "cormorant": "海燕",
   "strat op": "战略行动",
   "STRAT OP": "战略行动",
+  "Strategic Operation": "战略行动",
   "FVB Bomber": "聚焦涅槃隐轰",
   "jackdaw": "寒鸦",
   "rorqual tackled": "大鱼被抓",
   "blop": "黑隐特勤舰",
   "bomb": "隐轰",
   "torp bomber": "鱼雷隐轰",
-  "coms": "Mumble频道"
+  "coms": "Mumble频道",
+  "deimorino": "戴莫斯"
 }

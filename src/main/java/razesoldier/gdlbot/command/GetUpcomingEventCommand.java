@@ -12,7 +12,7 @@ import org.jsoup.Jsoup;
 import razesoldier.gdlbot.PandemicHordeWebsiteAccessor;
 import razesoldier.gdlbot.Services;
 import razesoldier.gdlbot.UpcomingEventsDatatableModel;
-import razesoldier.gdlbot.translation.TranslateException;
+import razesoldier.gdlbot.translation.TranslatorFactory;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -77,19 +77,15 @@ class GetUpcomingEventCommand implements Command {
                                     .append("优先级：").append(event.fleetPriority).append("\n")
                                     .append("时间：").append(event.time).append("\n")
                                     .append(SPLIT_LINE);
-                            try {
-                                zhMessage.append("名称：").append(translate(event.name)).append("\n")
-                                        .append("类型：").append(translateOpType(event.type)).append("\n")
-                                        .append("优先级：").append(translatePriority(event.fleetPriority)).append("\n")
-                                        .append("时间：").append(event.time).append("\n")
-                                        .append(SPLIT_LINE);
-                            } catch (TranslateException e) {
-                                logger.warning(e.getMessage());
-                            }
+                            zhMessage.append("名称：").append(translateOpName(event.name)).append("\n")
+                                    .append("类型：").append(translateOpType(event.type)).append("\n")
+                                    .append("优先级：").append(translatePriority(event.fleetPriority)).append("\n")
+                                    .append("时间：").append(event.time).append("\n")
+                                    .append(SPLIT_LINE);
                         }
                 );
 
-        contact.sendMessage(enMessage.append("腾讯云翻译：\n-----------------------\n").append(zhMessage).toString());
+        contact.sendMessage(enMessage.append("翻译：\n-----------------------\n").append(zhMessage).toString());
     }
 
     /**
@@ -98,10 +94,6 @@ class GetUpcomingEventCommand implements Command {
     @NotNull
     private String html2text(@NotNull String html) {
         return Jsoup.parse(html).text();
-    }
-
-    private String translate(String source) throws TranslateException {
-        return Services.getInstance().getTranslator().translate(source);
     }
 
     /**
@@ -142,6 +134,14 @@ class GetUpcomingEventCommand implements Command {
                 logger.warning(() -> String.format("GetUpcomingEventCommand#translateOpType doesn't handle '%s'", source));
                 return source;
         }
+    }
+
+    @NotNull
+    private String translateOpName(@NotNull String source) {
+        return Services.getInstance()
+                .getTranslationPipeline()
+                .addTranslator(TranslatorFactory.makeEVEProperNounsTranslator())
+                .translate(source);
     }
 
     @Override
