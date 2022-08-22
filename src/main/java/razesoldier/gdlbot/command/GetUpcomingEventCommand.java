@@ -73,13 +73,13 @@ class GetUpcomingEventCommand implements Command {
                 .sorted(Comparator.comparing(o -> o.time))
                 .forEach(event -> {
                             enMessage.append("名称：").append(event.name).append("\n")
-                                    .append("类型：").append(event.type).append("\n")
+                                    .append("类型：").append((event.type)).append("\n")
                                     .append("优先级：").append(event.fleetPriority).append("\n")
                                     .append("时间：").append(event.time).append("\n")
                                     .append(SPLIT_LINE);
                             try {
                                 zhMessage.append("名称：").append(translate(event.name)).append("\n")
-                                        .append("类型：").append(translate(event.type)).append("\n")
+                                        .append("类型：").append(translateOpType(event.type)).append("\n")
                                         .append("优先级：").append(translatePriority(event.fleetPriority)).append("\n")
                                         .append("时间：").append(event.time).append("\n")
                                         .append(SPLIT_LINE);
@@ -123,6 +123,23 @@ class GetUpcomingEventCommand implements Command {
             default:
                 var tempSource = source;
                 logger.warning(() -> String.format("GetUpcomingEventCommand#translatePriority doesn't handle '%s'", tempSource));
+                return source;
+        }
+    }
+
+    /**
+     * 反翻译集结类型
+     */
+    private String translateOpType(@NotNull String source) {
+        switch (source) {
+            case "Capitals":
+                return "旗舰";
+            case "def":
+                return "远征军";
+            case "Horde":
+                return "联盟";
+            default:
+                logger.warning(() -> String.format("GetUpcomingEventCommand#translateOpType doesn't handle '%s'", source));
                 return source;
         }
     }
