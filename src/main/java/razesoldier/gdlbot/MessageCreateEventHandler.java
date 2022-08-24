@@ -53,7 +53,10 @@ public class MessageCreateEventHandler implements Runnable {
                     String channelName = tuple3.getT2().getName();
                     return discordRelayConfig.discordServers().contains(guildName) && discordRelayConfig.discordChannels().contains(channelName);
                 })
-                .doOnError(error -> gdlBot.sendMessage(getAdminContact(), "[MessageCreateEventHandler] " + error.getMessage()))
+                .doOnError(error -> {
+                    gdlBot.sendMessage(getAdminContact(), "[MessageCreateEventHandler] " + error.getMessage()); // 给管理员用户发送错误消息
+                    discordRelayConfig.downstreamGroups().forEach(group -> gdlBot.sendMessageToGroup(group, "Ops,看起来有个集结通知未能转发"));
+                })
                 .doOnComplete(() -> discordMsgMapQQMSg.put(message.getId(), messageReceipts))
                 .subscribe(tuple3 -> {
                     String guildName = tuple3.getT1().getName();
