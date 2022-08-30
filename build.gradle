@@ -5,10 +5,10 @@ plugins {
 }
 
 group 'razesoldier'
-version '1.7'
+version '1.8'
 
-targetCompatibility = JavaVersion.VERSION_17
-sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_18
+sourceCompatibility = JavaVersion.VERSION_18
 
 repositories {
     mavenCentral()
