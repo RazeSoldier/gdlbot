@@ -31,7 +31,7 @@ dependencies {
 
 application {
     mainClass = 'razesoldier.gdlbot.Entry'
-    applicationDefaultJvmArgs = ['-Dmirai.no-desktop']
+    applicationDefaultJvmArgs = ['-Dmirai.no-desktop', '-Xmx128m']
 }
 
 jar {
