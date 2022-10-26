@@ -13,6 +13,7 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.MessageDeleteEvent;
 import discord4j.core.object.entity.Member;
+import discord4j.gateway.GatewayReactorResources;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.MessageReceipt;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +50,11 @@ public class DiscordBot {
     public void run() {
         Map<Snowflake, List<MessageReceipt<Group>>> discordMsgMapQQMSg = new HashMap<>();
         Map<Snowflake, Member> memberCache = new ConcurrentHashMap<>();
-        Mono<Void> login = client.withGateway(gateway -> {
+        Services.getInstance().getLogger().info("Try login to gateway");
+        Mono<Void> login = client.gateway()
+                // 手动设置gateway的配置
+                .setGatewayReactorResources(reactorResources -> GatewayReactorResources.builder(client.getCoreResources().getReactorResources()).build())
+                .withGateway(gateway -> {
                     Mono<Void> handleMessageCreate = gateway.on(MessageCreateEvent.class, event -> Mono.fromRunnable(new MessageCreateEventHandler(event, gdlBot, discordMsgMapQQMSg, memberCache))).then();
                     Mono<Void> handleMessageDelete = gateway.on(MessageDeleteEvent.class, event -> Mono.fromRunnable(new MessageDeleteEventHandler(event, discordMsgMapQQMSg))).then();
                     return handleMessageCreate.and(handleMessageDelete);
