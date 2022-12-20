@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'razesoldier'
-version '1.8'
+version '1.9'
 
 targetCompatibility = JavaVersion.VERSION_18
 sourceCompatibility = JavaVersion.VERSION_18
@@ -15,8 +15,8 @@ repositories {
 }
 
 dependencies {
-    api('net.mamoe:mirai-core-api:2.12.2')
-    runtimeOnly("net.mamoe:mirai-core:2.12.2")
+    api('net.mamoe:mirai-core-api:2.13.2')
+    runtimeOnly("net.mamoe:mirai-core:2.13.2")
     implementation('com.alibaba:fastjson:2.0.12')
     api('org.slf4j:slf4j-api:2.0.0')
     runtimeOnly('org.slf4j:slf4j-simple:2.0.0')
