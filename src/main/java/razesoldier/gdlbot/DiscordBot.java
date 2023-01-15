@@ -40,10 +40,19 @@ public class DiscordBot {
                 .httpClient(
                         HttpClient.create()
                                 // 为DiscordClient设置代理
-                                .proxy(typeSpec ->
-                                        typeSpec.type(ProxyProvider.Proxy.SOCKS5).host(proxy.host()).port(proxy.port()).build()
-                                )
+                                .proxy(typeSpec -> {
+                                    ProxyProvider.Proxy proxyType;
+                                    if (proxy.type().equals("socks5")) {
+                                        proxyType = ProxyProvider.Proxy.SOCKS5;
+                                        Services.getInstance().getLogger().info("Using socks5 proxy");
+                                    } else {
+                                        proxyType = ProxyProvider.Proxy.HTTP;
+                                        Services.getInstance().getLogger().info("Using http proxy");
+                                    }
+                                    typeSpec.type(proxyType).host(proxy.host()).port(proxy.port()).build();
+                                })
                 ).build();
+
         client = DiscordClientBuilder.create(config.discordBotToken()).setReactorResources(resources).build();
     }
 

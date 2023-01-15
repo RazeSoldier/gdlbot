@@ -36,7 +36,17 @@ public record Config(
     public record TencentCredential(String secretId, String secretKey, String region, Long projectId) {
     }
 
-    public record Proxy(String host, Integer port) {
+    /**
+     * @param type 代理类型，可允许的值为：http和socks5，如果未指定则默认为socks5
+     * @param host 代理IP
+     * @param port 代理端口
+     */
+    public record Proxy(String type, String host, Integer port) {
+        public Proxy {
+            if (type == null) {
+                type = "socks5";
+            }
+        }
     }
 
     /**
