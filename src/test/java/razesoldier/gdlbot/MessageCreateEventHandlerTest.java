@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MessageCreateEventHandlerTest {
     @ParameterizedTest
-    @MethodSource("dataProvider")
+    @MethodSource("testRemoveUnsupportedStringDataProvider")
     void testRemoveUnsupportedString(String expected, String input) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method method = MessageCreateEventHandler.class.getDeclaredMethod("removeUnsupportedString", String.class);
         method.setAccessible(true);
@@ -28,10 +28,28 @@ class MessageCreateEventHandlerTest {
     }
 
     @NotNull
-    static Stream<Arguments> dataProvider() {
+    static Stream<Arguments> testRemoveUnsupportedStringDataProvider() {
         return Stream.of(
                 Arguments.arguments("This is a test .", "This is a test <:hook:12412141>."),
                 Arguments.arguments("This is a test .", "This is a test <a:hook:12412141>.")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testTimeCommandTransformDataProvider")
+    void testTimeCommandTransform(String expected, String input) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = MessageCreateEventHandler.class.getDeclaredMethod("transformTimeCommand2LocalTime", String.class);
+        method.setAccessible(true);
+        Object res = method.invoke(null, input);
+        assertEquals(expected, res);
+    }
+
+    @NotNull
+    static Stream<Arguments> testTimeCommandTransformDataProvider() {
+        return Stream.of(
+                Arguments.arguments("2023-03-24 19:30", "<t:1679657400:R>"),
+                Arguments.arguments("Good chance of fight tomorrow in Cn timezone, hostiles are prepinging. Timer 2023-03-24 19:30",
+                        "Good chance of fight tomorrow in Cn timezone, hostiles are prepinging. Timer <t:1679657400:R>")
         );
     }
 }

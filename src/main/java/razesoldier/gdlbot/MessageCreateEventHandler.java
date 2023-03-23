@@ -17,6 +17,10 @@ import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -108,7 +112,8 @@ public class MessageCreateEventHandler implements Runnable {
     @NotNull
     private String normalizedMessageContent(@NotNull String content) {
         content = removeUnsupportedString(content);
-        return transformMemberId2Name(content);
+        content = transformMemberId2Name(content);
+        return transformTimeCommand2LocalTime(content);
     }
 
     /**
@@ -126,6 +131,17 @@ public class MessageCreateEventHandler implements Runnable {
     private String transformMemberId2Name(String content) {
         Matcher matcher = Pattern.compile("<@(\\d*)>").matcher(content);
         return matcher.replaceAll(matchResult -> "@" + getMemberNameById(Long.valueOf(matchResult.group(1))));
+    }
+
+    /**
+     * 将内容里诸如`&#60;t:1679657400:R>`的文本转换成对应+8时区的时间
+     */
+    private static String transformTimeCommand2LocalTime(String content) {
+        Matcher matcher = Pattern.compile("<t:(\\d*):R>").matcher(content);
+        return matcher.replaceAll(matchResult -> {
+            Instant instant = Instant.ofEpochSecond(Long.parseLong(matchResult.group(1)));
+            return LocalDateTime.ofInstant(instant, ZoneId.of("+8")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        });
     }
 
     /**
