@@ -8,17 +8,18 @@ package razesoldier.gdlbot;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.GuildChannel;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.MessageReceipt;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 处理{@link MessageCreateEvent}
@@ -105,7 +106,39 @@ public class MessageCreateEventHandler implements Runnable {
      * 规范化消息内容（去掉内容里的特殊字符）
      */
     @NotNull
-    private static String normalizedMessageContent(@NotNull String content) {
+    private String normalizedMessageContent(@NotNull String content) {
+        content = removeUnsupportedString(content);
+        return transformMemberId2Name(content);
+    }
+
+    /**
+     * 去掉内容里的不能被本程序处理的特殊字符串
+     */
+    @NotNull
+    @Contract(pure = true)
+    private static String removeUnsupportedString(@NotNull String content) {
         return content.replaceAll("<a?:.*?:\\d*>", "");
+    }
+
+    /**
+     * 将内容里诸如`<@757265324688277525>`的文本转换成对应的人名
+     */
+    private String transformMemberId2Name(String content) {
+        Matcher matcher = Pattern.compile("<@(\\d*)>").matcher(content);
+        return matcher.replaceAll(matchResult -> "@" + getMemberNameById(Long.valueOf(matchResult.group(1))));
+    }
+
+    /**
+     * 根据成员ID获得服务器的成员显示名
+     * @param id 成员ID
+     * @return 返回服务器的成员显示名，如果因为任何原因无法获得则回退成成员ID
+     */
+    private String getMemberNameById(Long id) {
+        return event.getGuild()
+                .blockOptional()
+                .map(guild -> guild.getMemberById(Snowflake.of(id)))
+                .map(Mono::block)
+                .map(PartialMember::getDisplayName)
+                .orElseGet(() -> String.valueOf(id));
     }
 }
