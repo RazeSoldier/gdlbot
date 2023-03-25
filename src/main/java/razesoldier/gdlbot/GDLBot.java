@@ -14,10 +14,16 @@ import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.message.MessageReceipt;
+import net.mamoe.mirai.message.data.Image;
+import net.mamoe.mirai.message.data.MessageChainBuilder;
+import net.mamoe.mirai.utils.ExternalResource;
 import org.jetbrains.annotations.NotNull;
 import razesoldier.gdlbot.command.Command;
 import razesoldier.gdlbot.command.CommandFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -48,6 +54,23 @@ class GDLBot {
 
     MessageReceipt<Group> sendMessageToGroup(Long id, String message) {
         return bot.getGroupOrFail(id).sendMessage(message);
+    }
+
+    MessageReceipt<Group> sendMessageToGroup(@NotNull Group group, String message, @NotNull List<Image> images) {
+        MessageChainBuilder messageChainBuilder = new MessageChainBuilder();
+        messageChainBuilder.append(message).addAll(images);
+
+        return group.sendMessage(messageChainBuilder.build());
+    }
+
+    Image uploadImage(@NotNull Group group, @NotNull InputStream inputStream) throws IOException {
+        try (ExternalResource externalResource = ExternalResource.create(inputStream)) {
+            return group.uploadImage(externalResource);
+        }
+    }
+
+    Group findGroup(Long id) {
+        return bot.getGroupOrFail(id);
     }
 
     private void registerMessageSubscribe() {

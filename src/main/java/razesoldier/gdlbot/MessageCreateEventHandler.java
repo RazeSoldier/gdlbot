@@ -12,11 +12,15 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.GuildChannel;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.MessageReceipt;
+import net.mamoe.mirai.message.data.Image;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -79,12 +83,40 @@ public class MessageCreateEventHandler implements Runnable {
                             channelName,
                             sender.getNickname().orElse(sender.getUsername()),
                             normalizedMessageContent(message.getContent())).toString();
-                    Flux.fromIterable(discordRelayConfig.downstreamGroups()).subscribe(group -> {
-                        var receipt = gdlBot.sendMessageToGroup(group, pendingMessage);
-                        // 每当发送QQ群消息时记录消息回执，用于撤回消息
-                        messageReceipts.add(receipt);
-                    });
+                    List<InputStream> inputStreams = DiscordUtil.image2InputStream(message.getAttachments());
+                    Flux.fromIterable(discordRelayConfig.downstreamGroups())
+                            .map(gdlBot::findGroup)
+                            .publishOn(Schedulers.boundedElastic())
+                            .doOnComplete(() -> {
+                                try {
+                                    RemoteFileUtil.closeInputStreams(inputStreams);
+                                } catch (IOException e) {
+                                    throw new CloseInputStreamException(e);
+                                }
+                            })
+                            .subscribe(group -> {
+                                var images = uploadImages(inputStreams, group);
+                                var receipt = gdlBot.sendMessageToGroup(group, pendingMessage, images);
+                                // 每当发送QQ群消息时记录消息回执，用于撤回消息
+                                messageReceipts.add(receipt);
+                            });
                 });
+    }
+
+    /**
+     * 将提供的{@link InputStream}作为图片上传到指定{@link Group 群组}
+     */
+    @NotNull
+    private List<Image> uploadImages(@NotNull List<InputStream> inputStreams, @NotNull Group group) {
+        List<Image> images = new ArrayList<>();
+        for (InputStream inputStream : inputStreams) {
+            try {
+                images.add(gdlBot.uploadImage(group, inputStream));
+            } catch (IOException e) {
+                Services.getInstance().getLogger().severe(e.getMessage());
+            }
+        }
+        return images;
     }
 
     /**
