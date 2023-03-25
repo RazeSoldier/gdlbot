@@ -18,8 +18,6 @@ import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.MessageReceipt;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.transport.ProxyProvider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,25 +32,9 @@ public class DiscordBot {
     private GDLBot gdlBot;
 
     public DiscordBot(@NotNull Config config) {
-        final var proxy = config.proxy();
-
         var resources = ReactorResources.builder()
-                .httpClient(
-                        HttpClient.create()
-                                // 为DiscordClient设置代理
-                                .proxy(typeSpec -> {
-                                    ProxyProvider.Proxy proxyType;
-                                    if (proxy.type().equals("socks5")) {
-                                        proxyType = ProxyProvider.Proxy.SOCKS5;
-                                        Services.getInstance().getLogger().info("Using socks5 proxy");
-                                    } else {
-                                        proxyType = ProxyProvider.Proxy.HTTP;
-                                        Services.getInstance().getLogger().info("Using http proxy");
-                                    }
-                                    typeSpec.type(proxyType).host(proxy.host()).port(proxy.port()).build();
-                                })
-                ).build();
-
+                .httpClient(RemoteFileUtil.httpClient()) // 为DiscordClient设置自定义的HttpClient
+                .build();
         client = DiscordClientBuilder.create(config.discordBotToken()).setReactorResources(resources).build();
     }
 
