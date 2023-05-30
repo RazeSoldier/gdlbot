@@ -50,10 +50,9 @@ public record Config(
     }
 
     /**
-     * @param discordServers 需要转发的服务器
      * @param discordChannels 需要转发的频道列表
      * @param downstreamGroups 指定转发的目标QQ群
      */
-    public record DiscordRelay(List<String> discordServers, List<String> discordChannels, List<Long> downstreamGroups) {
+    public record DiscordRelay(List<Long> discordChannels, List<Long> downstreamGroups) {
     }
 }

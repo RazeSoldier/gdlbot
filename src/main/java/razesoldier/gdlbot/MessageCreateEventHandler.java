@@ -65,10 +65,9 @@ public class MessageCreateEventHandler implements Runnable {
                     memberCache.put(tuple3.getT3().getId(), tuple3.getT3());
                 })
                 .filter(tuple3 -> {
-                    // 过滤请求。仅接受来自白名单服务器的消息
-                    String guildName = tuple3.getT1().getName();
-                    String channelName = tuple3.getT2().getName();
-                    return discordRelayConfig.discordServers().contains(guildName) && discordRelayConfig.discordChannels().contains(channelName);
+                    // 过滤请求。仅接受来自白名单频道的消息
+                    long channelId = tuple3.getT2().getId().asLong();
+                    return discordRelayConfig.discordChannels().contains(channelId);
                 })
                 .doOnError(error -> {
                     gdlBot.sendMessage(getAdminContact(), "[MessageCreateEventHandler] " + error.getMessage()); // 给管理员用户发送错误消息
