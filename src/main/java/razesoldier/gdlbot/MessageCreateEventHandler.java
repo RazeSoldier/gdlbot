@@ -8,7 +8,10 @@ package razesoldier.gdlbot;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.PartialMember;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.MessageReceipt;
@@ -37,7 +40,8 @@ public class MessageCreateEventHandler implements Runnable {
     private final GDLBot gdlBot;
     private final Map<Snowflake, List<MessageReceipt<Group>>> discordMsgMapQQMSg;
     private final Map<Snowflake, Member> memberCache;
-    private final Config.DiscordRelay discordRelayConfig;
+    private final List<Config.DiscordRelay> discordRelayConfig;
+    private final List<Long> channelWhitelist = new ArrayList<>();
 
     public MessageCreateEventHandler(MessageCreateEvent event,
                                      GDLBot gdlBot,
@@ -47,7 +51,8 @@ public class MessageCreateEventHandler implements Runnable {
         this.gdlBot = gdlBot;
         this.discordMsgMapQQMSg = discordMsgMapQQMSg;
         this.memberCache = memberCache;
-        discordRelayConfig = Services.getInstance().getConfig().discordRelay();
+        discordRelayConfig = Services.getInstance().getConfig().relays();
+        discordRelayConfig.forEach(discordRelay -> channelWhitelist.addAll(discordRelay.discordChannels()));
     }
 
     @Override
@@ -67,38 +72,62 @@ public class MessageCreateEventHandler implements Runnable {
                 .filter(tuple3 -> {
                     // 过滤请求。仅接受来自白名单频道的消息
                     long channelId = tuple3.getT2().getId().asLong();
-                    return discordRelayConfig.discordChannels().contains(channelId);
+                    return channelWhitelist.contains(channelId);
                 })
-                .doOnError(error -> {
-                    gdlBot.sendMessage(getAdminContact(), "[MessageCreateEventHandler] " + error.getMessage()); // 给管理员用户发送错误消息
-                    discordRelayConfig.downstreamGroups().forEach(group -> gdlBot.sendMessageToGroup(group, "Ops,看起来有个集结通知未能转发"));
-                })
+                .doOnError(error ->
+                    gdlBot.sendMessage(getAdminContact(), "[MessageCreateEventHandler] " + error.getMessage()) // 给管理员用户发送错误消息
+                )
                 .doOnComplete(() -> discordMsgMapQQMSg.put(message.getId(), messageReceipts))
                 .subscribe(tuple3 -> {
                     String guildName = tuple3.getT1().getName();
                     String channelName = tuple3.getT2().getName();
                     Member sender = tuple3.getT3();
+                    String msg = normalizedMessageContent(message.getContent());
+                    List<InputStream> inputStreams; // 最终要传给sendMessageToDownstream()方法的文件流列表
+                    inputStreams = DiscordUtil.attachment2InputStream(message.getAttachments());
+                    msg = handleImageLink(msg, inputStreams);
                     var pendingMessage = new PingNotification(guildName,
                             channelName,
                             sender.getNickname().orElse(sender.getUsername()),
-                            normalizedMessageContent(message.getContent())).toString();
-                    List<InputStream> inputStreams = DiscordUtil.image2InputStream(message.getAttachments());
-                    Flux.fromIterable(discordRelayConfig.downstreamGroups())
-                            .map(gdlBot::findGroup)
-                            .publishOn(Schedulers.boundedElastic())
-                            .doOnComplete(() -> {
-                                try {
-                                    RemoteFileUtil.closeInputStreams(inputStreams);
-                                } catch (IOException e) {
-                                    throw new CloseInputStreamException(e);
-                                }
-                            })
-                            .subscribe(group -> {
-                                var images = uploadImages(inputStreams, group);
-                                var receipt = gdlBot.sendMessageToGroup(group, pendingMessage, images);
-                                // 每当发送QQ群消息时记录消息回执，用于撤回消息
-                                messageReceipts.add(receipt);
-                            });
+                            msg
+                    ).toString();
+                    for (Config.DiscordRelay relay : discordRelayConfig) {
+                        if (relay.discordChannels().contains(tuple3.getT2().getId().asLong())) {
+                            sendMessageToDownstream(messageReceipts, pendingMessage, inputStreams, relay.downstreamGroups());
+                        }
+                    }
+                });
+    }
+
+    /**
+     * 处理消息中图片链接
+     */
+    private static String handleImageLink(String message, List<InputStream> inputStreams) {
+        Pattern pattern = Pattern.compile("https+://.*?\\.gif");
+        Matcher matcher = pattern.matcher(message);
+        while (matcher.find()) {
+            inputStreams.add(RemoteFileUtil.getInputStream(matcher.group()));
+        }
+        message = matcher.replaceAll("");
+        return message;
+    }
+
+    private void sendMessageToDownstream(List<MessageReceipt<Group>> messageReceipts, String pendingMessage, List<InputStream> inputStreams, List<Long> downstream) {
+        Flux.fromIterable(downstream)
+                .map(gdlBot::findGroup)
+                .publishOn(Schedulers.boundedElastic())
+                .doOnComplete(() -> {
+                    try {
+                        RemoteFileUtil.closeInputStreams(inputStreams);
+                    } catch (IOException e) {
+                        throw new CloseInputStreamException(e);
+                    }
+                })
+                .subscribe(group -> {
+                    var images = uploadImages(inputStreams, group);
+                    var receipt = gdlBot.sendMessageToGroup(group, pendingMessage, images);
+                    // 每当发送QQ群消息时记录消息回执，用于撤回消息
+                    messageReceipts.add(receipt);
                 });
     }
 

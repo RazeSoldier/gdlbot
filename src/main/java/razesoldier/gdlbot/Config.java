@@ -17,7 +17,7 @@ import java.util.List;
  * @param tencentCred 腾讯云的认证凭据，用来访问腾讯云的机器翻译服务
  * @param proxy Discord机器人的代理配置
  * @param discordBotToken Discord机器人的令牌
- * @param discordRelay Discord机器人的转发配置
+ * @param relays Discord机器人的转发配置
  * @param adminContact 机器人管理员的QQ号（可以用于接受错误消息）
  */
 public record Config(
@@ -27,7 +27,7 @@ public record Config(
         TencentCredential tencentCred,
         Proxy proxy,
         String discordBotToken,
-        DiscordRelay discordRelay,
+        List<DiscordRelay> relays,
         Long adminContact
 ) {
     public record Account(Long qq, String password) {

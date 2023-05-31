@@ -18,7 +18,7 @@ public class DiscordUtil {
      * 将Discord消息的附件转换成{@link InputStream}
      */
     @NotNull
-    public static List<InputStream> image2InputStream(@NotNull List<Attachment> attachments) {
+    public static List<InputStream> attachment2InputStream(@NotNull List<Attachment> attachments) {
         List<InputStream> list = new ArrayList<>();
         for (Attachment attachment : attachments) {
             boolean isImage = attachment.getContentType().filter(s -> s.startsWith("image")).isPresent();
