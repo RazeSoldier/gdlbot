@@ -28,7 +28,8 @@ public record Config(
         Proxy proxy,
         String discordBotToken,
         List<DiscordRelay> relays,
-        Long adminContact
+        Long adminContact,
+        String qqProtocolVersion
 ) {
     public record Account(Long qq, String password) {
     }

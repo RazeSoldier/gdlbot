@@ -12,6 +12,7 @@ import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.utils.BotConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.cssxsh.mirai.tool.FixProtocolVersion;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,7 +40,7 @@ public class Entry {
 
         Services.setup(config, logger);
 
-        var gdlBot = new GDLBot(logger, config, newBot(config.account()));
+        var gdlBot = new GDLBot(logger, config, newBot(config.account(), config.qqProtocolVersion()));
         gdlBot.run();
         var discordBot = new DiscordBot(config);
         discordBot.setGDLBot(gdlBot);
@@ -53,10 +54,15 @@ public class Entry {
     }
 
     @NotNull
-    private static Bot newBot(@NotNull Config.Account account) {
+    private static Bot newBot(@NotNull Config.Account account, String qqProtocolVersion) {
+        // 如果未在配置文件里指定QQ协议版本则默认为8.9.63
+        if (qqProtocolVersion == null) {
+            qqProtocolVersion = "8.9.63";
+        }
         var botConfig = new BotConfiguration();
         botConfig.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_PAD); // 使用PAD协议，这样可以允许手机和机器人同时在线
         botConfig.fileBasedDeviceInfo("deviceinfo.json"); // 生成设备信息并在下次启动的时候自动重用
+        FixProtocolVersion.fetch(BotConfiguration.MiraiProtocol.ANDROID_PAD, qqProtocolVersion);
         return BotFactory.INSTANCE.newBot(account.qq(), account.password(), botConfig);
     }
 }
