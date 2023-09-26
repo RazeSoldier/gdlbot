@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 用于翻译EVE专有名词
@@ -33,7 +35,7 @@ class EVEProperNounsTranslator implements Translator {
                     capitalizeFirstLetter(en), capitalizeAllLetter(en), en};
             for (String target : targets) {
                 var before = ref.get();
-                var after = before.replace(target, zh);
+                var after = replace(ref.get(), target, zh);
                 // 如果替换成功则直接跳过剩下的target
                 if (!before.equals(after)) {
                     ref.set(after);
@@ -42,6 +44,14 @@ class EVEProperNounsTranslator implements Translator {
             }
         });
         return ref.get();
+    }
+
+    /**
+     * 使用正则表达式替换
+     */
+    private String replace(String source, String target, String replacement) {
+        Matcher matcher = Pattern.compile(String.format("\\b%s\\b", target)).matcher(source);
+        return matcher.replaceAll(replacement);
     }
 
     /**
