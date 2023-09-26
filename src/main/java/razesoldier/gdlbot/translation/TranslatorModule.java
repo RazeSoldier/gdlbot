@@ -15,7 +15,7 @@ import com.google.inject.throwingproviders.ThrowingProviderBinder;
 import razesoldier.gdlbot.Config;
 import razesoldier.gdlbot.Services;
 
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

@@ -18,7 +18,7 @@ dependencies {
     implementation('com.alibaba:fastjson:2.0.32')
     api('org.slf4j:slf4j-api:2.0.5')
     runtimeOnly('org.slf4j:slf4j-simple:2.0.5')
-    implementation('com.google.inject:guice:5.1.0')
+    implementation('com.google.inject:guice:7.0.0')
     implementation('com.google.inject.extensions:guice-throwingproviders:5.1.0')
     implementation('org.jsoup:jsoup:1.15.4')
     implementation('com.discord4j:discord4j-core:3.2.3')
