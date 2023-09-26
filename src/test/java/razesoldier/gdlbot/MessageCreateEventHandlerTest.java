@@ -78,6 +78,7 @@ class MessageCreateEventHandlerTest {
                 new Config.Proxy("socks5", "127.0.0.1", 21881),
                 null,
                 null,
+                null,
                 null
         ), Logger.getGlobal());
     }
