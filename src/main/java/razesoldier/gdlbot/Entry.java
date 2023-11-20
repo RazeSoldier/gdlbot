@@ -40,7 +40,7 @@ public class Entry {
 
         Services.setup(config, logger);
 
-        var gdlBot = new GDLBot(logger, config, newBot(config.account(), config.qqProtocolVersion()));
+        var gdlBot = new GDLBot(logger, config, newBot(config.account()));
         gdlBot.run();
         var discordBot = new DiscordBot(config);
         discordBot.setGDLBot(gdlBot);
@@ -54,15 +54,11 @@ public class Entry {
     }
 
     @NotNull
-    private static Bot newBot(@NotNull Config.Account account, String qqProtocolVersion) {
-        // 如果未在配置文件里指定QQ协议版本则默认为8.9.63
-        if (qqProtocolVersion == null) {
-            qqProtocolVersion = "8.9.63";
-        }
+    private static Bot newBot(@NotNull Config.Account account) {
         var botConfig = new BotConfiguration();
         botConfig.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_PAD); // 使用PAD协议，这样可以允许手机和机器人同时在线
         botConfig.fileBasedDeviceInfo("deviceinfo.json"); // 生成设备信息并在下次启动的时候自动重用
-        FixProtocolVersion.fetch(BotConfiguration.MiraiProtocol.ANDROID_PAD, qqProtocolVersion);
+        FixProtocolVersion.load(BotConfiguration.MiraiProtocol.ANDROID_PAD);
         return BotFactory.INSTANCE.newBot(account.qq(), account.password(), botConfig);
     }
 }
