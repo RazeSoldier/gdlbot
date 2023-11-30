@@ -6,6 +6,7 @@
 
 package razesoldier.gdlbot.command;
 
+import com.alibaba.fastjson2.JSONException;
 import net.mamoe.mirai.contact.Contact;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
@@ -50,6 +51,9 @@ class GetUpcomingEventCommand implements Command {
         } catch (InterruptedException e) {
             logger.warning(String.format("Can't access PH site, reason: %s", e.getMessage()));
             Thread.currentThread().interrupt();
+            return;
+        } catch (JSONException e) {
+            contact.sendMessage("JSON解析失败，是不是登录状态失效了??");
             return;
         }
 
