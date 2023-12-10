@@ -20,7 +20,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,6 +95,11 @@ public class MessageCreateEventHandler implements Runnable {
                             sendMessageToDownstream(messageReceipts, pendingMessage, inputStreams, relay.downstreamGroups());
                         }
                     }
+                    try {
+                        RemoteFileUtil.closeInputStreams(inputStreams);
+                    } catch (IOException e) {
+                        throw new CloseInputStreamException(e);
+                    }
                 });
     }
 
@@ -112,23 +116,14 @@ public class MessageCreateEventHandler implements Runnable {
         return message;
     }
 
-    private void sendMessageToDownstream(List<MessageReceipt<Group>> messageReceipts, String pendingMessage, List<InputStream> inputStreams, List<Long> downstream) {
-        Flux.fromIterable(downstream)
-                .map(gdlBot::findGroup)
-                .publishOn(Schedulers.boundedElastic())
-                .doOnComplete(() -> {
-                    try {
-                        RemoteFileUtil.closeInputStreams(inputStreams);
-                    } catch (IOException e) {
-                        throw new CloseInputStreamException(e);
-                    }
-                })
-                .subscribe(group -> {
-                    var images = uploadImages(inputStreams, group);
-                    var receipt = gdlBot.sendMessageToGroup(group, pendingMessage, images);
-                    // 每当发送QQ群消息时记录消息回执，用于撤回消息
-                    messageReceipts.add(receipt);
-                });
+    private void sendMessageToDownstream(List<MessageReceipt<Group>> messageReceipts, String pendingMessage, List<InputStream> inputStreams, @NotNull List<Long> downstream) {
+        for (Long groupId : downstream) {
+            Group group = gdlBot.findGroup(groupId);
+            var images = uploadImages(inputStreams, group);
+            var receipt = gdlBot.sendMessageToGroup(group, pendingMessage, images);
+            // 每当发送QQ群消息时记录消息回执，用于撤回消息
+            messageReceipts.add(receipt);
+        }
     }
 
     /**
@@ -139,6 +134,7 @@ public class MessageCreateEventHandler implements Runnable {
         List<Image> images = new ArrayList<>();
         for (InputStream inputStream : inputStreams) {
             try {
+                inputStream.reset(); // 重置输入流
                 images.add(gdlBot.uploadImage(group, inputStream));
             } catch (IOException e) {
                 Services.getInstance().getLogger().severe(e.getMessage());
