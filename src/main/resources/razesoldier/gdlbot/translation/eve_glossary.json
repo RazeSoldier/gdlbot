@@ -33,7 +33,7 @@
   "deimos": "戴莫斯",
   "devoter": "奉献",
   "dictor": "轻拦",
-  "doctrine": "优先级",
+  "doctrine": "建制",
   "eagle": "银鹰",
   "eos": "曙光女神",
   "exequror": "送葬",
@@ -90,5 +90,6 @@
   "zealot": "狂热",
   "motd": "舰队置顶",
   "comm": "语音",
-  "roaming": "收割"
+  "roaming": "收割",
+  "goons": "蜜蜂"
 }

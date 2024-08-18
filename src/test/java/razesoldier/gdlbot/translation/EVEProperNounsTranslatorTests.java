@@ -23,7 +23,7 @@ class EVEProperNounsTranslatorTests {
         var translator = getInstance();
         assertEquals("重导", translator.translate("HML"));
         assertEquals("重导 小希", translator.translate("HML Cerberus"));
-        assertEquals("优先级: 重导 小希/曲剑 > 隐秘行动T3 加成 > 指挥驱逐 加成 (鹳鸟/Biforsts)  > 麒麟/手术刀 > 轻拦 > NBI 守夜/克勒斯",
+        assertEquals("建制: 重导 小希/曲剑 > 隐秘行动T3 加成 > 指挥驱逐 加成 (鹳鸟/Biforsts)  > 麒麟/手术刀 > 轻拦 > NBI 守夜/克勒斯",
                 translator.translate("Doctrine: HML Cerberus/Scimitar > Ninja Links > Cmd Destroyer Links (Storks/Biforsts)  > Kirin/Scalpels > Dictors > NBI Vigil/Keres"));
         assertEquals("鹳鸟/天梯 加成 > 曲剑 > 轻拦 > 侦查舰 > 小希 (重导 配置) > 斯威普 > NBI 守夜",
                 translator.translate("Stork/Bifrost links > Scimitars > Interdictors > Recons > Cerberuses (HML FITS) > Svipuls > NBI Vigils"));
