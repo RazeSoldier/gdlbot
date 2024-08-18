@@ -14,7 +14,7 @@ repositories {
 dependencies {
     api('net.mamoe:mirai-core-api:2.16.0')
     runtimeOnly("net.mamoe:mirai-core:2.16.0")
-    implementation 'org.asynchttpclient:async-http-client:3.0.0' // libs/fix-protocol-version依赖这个库
+    implementation('org.asynchttpclient:async-http-client:2.12.3') // libs/fix-protocol-version依赖这个库
     implementation('com.alibaba.fastjson2:fastjson2:2.0.52')
     api('org.slf4j:slf4j-api:2.0.16')
     runtimeOnly('org.slf4j:slf4j-simple:2.0.16')
