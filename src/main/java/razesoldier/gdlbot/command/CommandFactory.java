@@ -32,6 +32,9 @@ public class CommandFactory {
         if (msg.equals(".event")) {
             return new GetUpcomingEventCommand(logger, config.phSiteCookie());
         }
+        if (msg.startsWith(".bl ")) {
+            return new QueryBlacklistCommand(msg.trim().substring(4), config.phSiteCookie(), logger);
+        }
         return new EmptyCommand();
     }
 }
