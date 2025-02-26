@@ -79,6 +79,8 @@ class MessageCreateEventHandlerTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
         ), Logger.getGlobal());
     }

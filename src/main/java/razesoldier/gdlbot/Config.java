@@ -19,6 +19,8 @@ import java.util.List;
  * @param discordBotToken Discord机器人的令牌
  * @param relays Discord机器人的转发配置
  * @param adminContact 机器人管理员的QQ号（可以用于接受错误消息）
+ * @param termRepoIDs 指定腾讯云翻译时使用词库的ID列表
+ * @param sentRepoIDs 指定腾讯云翻译时使用例句库的ID列表
  */
 public record Config(
         Account account,
@@ -29,7 +31,9 @@ public record Config(
         String discordBotToken,
         List<DiscordRelay> relays,
         Long adminContact,
-        String qqProtocolVersion
+        String qqProtocolVersion,
+        List<String> termRepoIDs,
+        List<String> sentRepoIDs
 ) {
     public record Account(Long qq, String password) {
     }

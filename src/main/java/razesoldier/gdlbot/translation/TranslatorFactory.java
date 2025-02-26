@@ -10,6 +10,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import razesoldier.gdlbot.Services;
 
 /**
  * {@link razesoldier.gdlbot.translation}包的API之一
@@ -27,7 +28,20 @@ public class TranslatorFactory {
 
     @NotNull
     public static TencentTranslator makeTencentTranslator() {
-        return getInjector().getInstance(TencentTranslator.class);
+        TencentTranslator instance = getInjector().getInstance(TencentTranslator.class);
+        var termRepoIds = Services.getInstance().getConfig().termRepoIDs();
+        if (termRepoIds != null) {
+            for (String id : termRepoIds) {
+                instance.addTermRepo(id);
+            }
+        }
+        var sentRepoIds = Services.getInstance().getConfig().sentRepoIDs();
+        if (sentRepoIds != null) {
+            for (String id : sentRepoIds) {
+                instance.addSentRepo(id);
+            }
+        }
+        return instance;
     }
 
     @NotNull

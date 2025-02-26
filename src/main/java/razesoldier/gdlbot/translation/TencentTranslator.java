@@ -14,9 +14,14 @@ import com.tencentcloudapi.tmt.v20180321.models.TextTranslateRequest;
 import org.jetbrains.annotations.NotNull;
 import razesoldier.gdlbot.Config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class TencentTranslator implements Translator {
     private final TmtClient client;
     private final Long projectId;
+    private final List<String> termRepoIDs = new ArrayList<>();
+    private final List<String> sentRepoIDs = new ArrayList<>();
 
     @Inject
     TencentTranslator(@NotNull @TranslatorModule.TencentCredential Config.TencentCredential credential) {
@@ -33,10 +38,30 @@ class TencentTranslator implements Translator {
         req.setTarget("zh");
         req.setProjectId(projectId);
         req.setUntranslatedText("CCP"); // 不要翻译CCP
+        if (!termRepoIDs.isEmpty()) {
+            req.setTermRepoIDList(termRepoIDs.toArray(new String[0]));
+        }
+        if (!sentRepoIDs.isEmpty()) {
+            req.setSentRepoIDList(sentRepoIDs.toArray(new String[0]));
+        }
         try {
             return client.TextTranslate(req).getTargetText();
         } catch (TencentCloudSDKException e) {
             throw new TranslateException(e);
         }
+    }
+
+    /**
+     * 添加术语库ID，在请求API的时候会包含进去
+     */
+    public void addTermRepo(String repoId) {
+        termRepoIDs.add(repoId);
+    }
+
+    /**
+     * 添加例句库ID，在请求API的时候会包含进去
+     */
+    public void addSentRepo(String sentRepoId) {
+        sentRepoIDs.add(sentRepoId);
     }
 }

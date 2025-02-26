@@ -38,7 +38,6 @@ public class PingNotification {
     private String translate(@NotNull String source) {
         return Services.getInstance()
                 .getTranslationPipeline()
-                .addTranslator(TranslatorFactory.makeEVEProperNounsTranslator())
                 .addTranslator(TranslatorFactory.makeTencentTranslator())
                 .translate(source);
     }
