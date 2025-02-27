@@ -31,7 +31,10 @@ class TencentTranslator implements Translator {
     }
 
     @Override
-    public String translate(String source) throws TranslateException {
+    public String translate(@NotNull String source) throws TranslateException {
+        if (source.isEmpty()) {
+            return source;
+        }
         var req = new TextTranslateRequest();
         req.setSourceText(source);
         req.setSource("en");
