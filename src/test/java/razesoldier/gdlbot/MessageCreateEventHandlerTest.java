@@ -8,6 +8,7 @@ package razesoldier.gdlbot;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -69,6 +70,19 @@ class MessageCreateEventHandlerTest {
         assertEquals(2, inputStreams.size());
     }
 
+    @Test
+    @EnabledIfEnvironmentVariable(named = "IMGUR_CLIENT_ID", matches = ".*")
+    void testHandleImgurLink() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        mockTestServices();
+        Method method = MessageCreateEventHandler.class.getDeclaredMethod("handleImgurLink", String.class, List.class);
+        method.setAccessible(true);
+        List<InputStream> inputStreams = new ArrayList<>();
+        String res = (String) method.invoke(null, "https://imgur.com/CVRqEcb", inputStreams);
+        assertEquals("", res);
+        res = (String) method.invoke(null, "https://imgur.com/CVRqEcb test", inputStreams);
+        assertEquals(" test", res);
+    }
+
     private static void mockTestServices() {
         Services.setup(new Config(
                 null,
@@ -81,7 +95,8 @@ class MessageCreateEventHandlerTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                System.getenv("IMGUR_CLIENT_ID")
         ), Logger.getGlobal());
     }
 }

@@ -45,26 +45,34 @@ public class RemoteFileUtil {
     }
 
     /**
-     * 获得{@link HttpClient Reactor Netty的HttpClient}，此HttpClient已经使用了机器人配置文件所设置的代理
+     * 获得{@link HttpClient Reactor Netty的HttpClient}单例，此HttpClient已经使用了机器人配置文件所设置的代理
      */
     public static HttpClient httpClient() {
         if (httpClient == null) {
-            Config.Proxy proxy = Services.getInstance().getConfig().proxy();
-            httpClient = HttpClient.create()
-                    .proxy(typeSpec -> {
-                        ProxyProvider.Proxy proxyType;
-                        if (proxy.type().equals("socks5")) {
-                            proxyType = ProxyProvider.Proxy.SOCKS5;
-                            Services.getInstance().getLogger().info("Using socks5 proxy");
-                        } else {
-                            proxyType = ProxyProvider.Proxy.HTTP;
-                            Services.getInstance().getLogger().info("Using http proxy");
-                        }
-                        typeSpec.type(proxyType).host(proxy.host()).port(proxy.port()).build();
-                    });
+            httpClient = newHttpClient();
         }
 
         return httpClient;
+    }
+
+    /**
+     * 获得一个新的{@link HttpClient HttpClient}，此HttpClient已经使用了机器人配置文件所设置的代理
+     */
+    @NotNull
+    public static HttpClient newHttpClient() {
+        Config.Proxy proxy = Services.getInstance().getConfig().proxy();
+        return HttpClient.create()
+                .proxy(typeSpec -> {
+                    ProxyProvider.Proxy proxyType;
+                    if (proxy.type().equals("socks5")) {
+                        proxyType = ProxyProvider.Proxy.SOCKS5;
+                        Services.getInstance().getLogger().info("Using socks5 proxy");
+                    } else {
+                        proxyType = ProxyProvider.Proxy.HTTP;
+                        Services.getInstance().getLogger().info("Using http proxy");
+                    }
+                    typeSpec.type(proxyType).host(proxy.host()).port(proxy.port()).build();
+                });
     }
 
     private RemoteFileUtil() {}

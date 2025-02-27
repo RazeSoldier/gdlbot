@@ -81,10 +81,15 @@ public class MessageCreateEventHandler implements Runnable {
                     String guildName = tuple3.getT1().getName();
                     String channelName = tuple3.getT2().getName();
                     Member sender = tuple3.getT3();
-                    String msg = normalizedMessageContent(message.getContent());
                     List<InputStream> inputStreams; // 最终要传给sendMessageToDownstream()方法的文件流列表
                     inputStreams = DiscordUtil.attachment2InputStream(message.getAttachments());
+                    String msg = normalizedMessageContent(message.getContent());
                     msg = handleImageLink(msg, inputStreams);
+                    try {
+                        msg = handleImgurLink(msg, inputStreams);
+                    } catch (ImgurApiException e) {
+                        Services.getInstance().getLogger().warning(e.getMessage());
+                    }
                     var pendingMessage = new PingNotification(guildName,
                             channelName,
                             sender.getNickname().orElse(sender.getUsername()),
@@ -111,6 +116,17 @@ public class MessageCreateEventHandler implements Runnable {
         Matcher matcher = pattern.matcher(message);
         while (matcher.find()) {
             inputStreams.add(RemoteFileUtil.getInputStream(matcher.group()));
+        }
+        message = matcher.replaceAll("");
+        return message;
+    }
+
+    private static String handleImgurLink(String message, List<InputStream> inputStreams) throws ImgurApiException {
+        Pattern pattern = Pattern.compile("https://imgur.com/(\\w*)");
+        Matcher matcher = pattern.matcher(message);
+        while (matcher.find()) {
+            String link = new ImgurApi(Services.getInstance().getConfig().imgurClientId()).getImageLink(matcher.group(1));
+            inputStreams.add(RemoteFileUtil.getInputStream(link));
         }
         message = matcher.replaceAll("");
         return message;

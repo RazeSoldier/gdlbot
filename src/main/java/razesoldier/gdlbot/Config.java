@@ -21,6 +21,7 @@ import java.util.List;
  * @param adminContact 机器人管理员的QQ号（可以用于接受错误消息）
  * @param termRepoIDs 指定腾讯云翻译时使用词库的ID列表
  * @param sentRepoIDs 指定腾讯云翻译时使用例句库的ID列表
+ * @param imgurClientId Imgur Api的客户端ID，用于请求Imgur Api
  */
 public record Config(
         Account account,
@@ -33,7 +34,8 @@ public record Config(
         Long adminContact,
         String qqProtocolVersion,
         List<String> termRepoIDs,
-        List<String> sentRepoIDs
+        List<String> sentRepoIDs,
+        String imgurClientId
 ) {
     public record Account(Long qq, String password) {
     }
