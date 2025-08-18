@@ -26,7 +26,7 @@ public class Entry {
         Config config;
         try {
             config = getConfig();
-        } catch (IOException e) {
+        } catch (IOException _) {
             logger.severe("Can't read config.json");
             return;
         }

@@ -52,7 +52,7 @@ class GetUpcomingEventCommand implements Command {
             logger.warning(String.format("Can't access PH site, reason: %s", e.getMessage()));
             Thread.currentThread().interrupt();
             return;
-        } catch (JSONException e) {
+        } catch (JSONException _) {
             contact.sendMessage("JSON解析失败，是不是登录状态失效了??");
             return;
         }
