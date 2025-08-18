@@ -127,17 +127,15 @@ class GetUpcomingEventCommand implements Command {
      * 反翻译集结类型
      */
     private String translateOpType(@NotNull String source) {
-        switch (source) {
-            case "Capitals":
-                return "旗舰";
-            case "def":
-                return "远征军";
-            case "Horde":
-                return "联盟";
-            default:
+        return switch (source) {
+            case "Capitals" -> "旗舰";
+            case "def" -> "远征军";
+            case "Horde" -> "联盟";
+            default -> {
                 logger.warning(() -> String.format("GetUpcomingEventCommand#translateOpType doesn't handle '%s'", source));
-                return source;
-        }
+                yield source;
+            }
+        };
     }
 
     @NotNull
