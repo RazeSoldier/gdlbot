@@ -8,11 +8,8 @@ package razesoldier.gdlbot;
 
 import com.alibaba.fastjson2.JSON;
 import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.BotFactory;
-import net.mamoe.mirai.utils.BotConfiguration;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.cssxsh.mirai.tool.FixProtocolVersion;
+import top.mrxiaom.overflow.BotBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,10 +34,16 @@ public class Entry {
             logger.severe("Can't parse config.json");
             return;
         }
+        String onebotHost = System.getenv("ONEBOT_HOST");
+        String onebotToken = System.getenv("ONEBOT_TOKEN");
+        if (onebotHost == null) {
+            logger.severe("ONEBOT_HOST not set");
+            return;
+        }
 
         Services.setup(config, logger);
 
-        var gdlBot = new GDLBot(logger, config, newBot(config.account()));
+        var gdlBot = new GDLBot(logger, config, newBot(onebotHost, onebotToken));
         gdlBot.run();
         var discordBot = new DiscordBot(config);
         discordBot.setGDLBot(gdlBot);
@@ -53,12 +56,12 @@ public class Entry {
         return JSON.parseObject(text, Config.class);
     }
 
-    @NotNull
-    private static Bot newBot(@NotNull Config.Account account) {
-        var botConfig = new BotConfiguration();
-        botConfig.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_PAD); // 使用PAD协议，这样可以允许手机和机器人同时在线
-        botConfig.fileBasedDeviceInfo("deviceinfo.json"); // 生成设备信息并在下次启动的时候自动重用
-        FixProtocolVersion.load(BotConfiguration.MiraiProtocol.ANDROID_PAD);
-        return BotFactory.INSTANCE.newBot(account.qq(), account.password(), botConfig);
+    @Nullable
+    private static Bot newBot(String onebotHost, @Nullable String onebotToken) {
+        BotBuilder builder = BotBuilder.positive(onebotHost);
+        if (onebotToken != null) {
+            builder.token(onebotToken);
+        }
+        return builder.connect();
     }
 }
