@@ -10,8 +10,6 @@ import java.util.List;
 
 /**
  * 本机器人配置文件的数据模型
- *
- * @param account 运行QQ机器人的帐号
  * @param messageSubscribeList 订阅指定QQ群（处理命令）
  * @param phSiteCookie www.pandemic-horde.org的`remember_web_*`cookie，用于模拟真实用户的访问
  * @param tencentCred 腾讯云的认证凭据，用来访问腾讯云的机器翻译服务
@@ -24,7 +22,6 @@ import java.util.List;
  * @param imgurClientId Imgur Api的客户端ID，用于请求Imgur Api
  */
 public record Config(
-        Account account,
         List<Long> messageSubscribeList,
         String phSiteCookie,
         TencentCredential tencentCred,
@@ -37,9 +34,6 @@ public record Config(
         List<String> sentRepoIDs,
         String imgurClientId
 ) {
-    public record Account(Long qq, String password) {
-    }
-
     public record TencentCredential(String secretId, String secretKey, String region, Long projectId) {
     }
 
