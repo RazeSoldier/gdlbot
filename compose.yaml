@@ -1,0 +1,16 @@
+name: gdlbot
+
+services:
+  onebot-backend:
+    build: lagrange
+
+  gdlbot-frontend:
+    image: razesoldier/gdlbot:0.1
+    depends_on:
+      onebot-backend:
+        condition: service_healthy
+    env_file: env.list
+    environment:
+      ONEBOT_HOST: "ws://onebot-backend:8089"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -3,7 +3,7 @@
 /build
 /cache
 /config.json
-/deviceinfo.json
 /gradle/wrapper/gradle-wrapper.jar
 /KFCFactory.json
-/android_pad.json
+/lagrange
+/env.list
