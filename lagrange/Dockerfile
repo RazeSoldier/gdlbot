@@ -4,8 +4,8 @@
 # 配置定义了一个HTTP Websocks实现监听8089端口供GDLBot使用
 FROM ghcr.io/lagrangedev/lagrange.onebot:edge
 
-COPY appsettings.json /app/data
-COPY check_health.sh /app/data
+COPY appsettings.json /app/data/
+COPY --chmod=645 check_health.sh /app/data/
 
 RUN apt-get install --no-install-recommends -y curl \
     && apt-get clean \
