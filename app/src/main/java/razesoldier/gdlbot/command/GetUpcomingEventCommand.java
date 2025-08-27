@@ -11,8 +11,8 @@ import net.mamoe.mirai.contact.Contact;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import razesoldier.gdlbot.PandemicHordeWebsiteAccessor;
-import razesoldier.gdlbot.Services;
 import razesoldier.gdlbot.UpcomingEventsDatatableModel;
+import razesoldier.gdlbot.translation.TranslationPipeline;
 import razesoldier.gdlbot.translation.TranslatorFactory;
 
 import java.io.IOException;
@@ -140,8 +140,7 @@ class GetUpcomingEventCommand implements Command {
 
     @NotNull
     private String translateOpName(@NotNull String source) {
-        return Services.getInstance()
-                .getTranslationPipeline()
+        return new TranslationPipeline()
                 .addTranslator(TranslatorFactory.makeEVEProperNounsTranslator())
                 .translate(source);
     }

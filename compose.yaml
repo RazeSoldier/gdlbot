@@ -5,7 +5,7 @@ services:
     build: lagrange
 
   gdlbot-frontend:
-    image: razesoldier/gdlbot:0.1
+    image: razesoldier/gdlbot:0.2
     depends_on:
       onebot-backend:
         condition: service_healthy

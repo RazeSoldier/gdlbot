@@ -1,20 +1,24 @@
 # syntax=docker/dockerfile:1
-FROM gradle:8.13.0-jdk23 AS builder
+FROM gradle:9.0.0-jdk24 AS builder
 
-USER gradle
 WORKDIR /home/gradle/gdlbot
-COPY build.gradle .
 COPY config.json .
-COPY src ./src
+COPY app ./app
+COPY ph-util ./ph-util
+COPY shared ./shared
+COPY translation ./translation
+COPY util ./util
+COPY settings.gradle.kts  ./settings.gradle.kts
+COPY gradle/libs.versions.toml  ./gradle/libs.versions.toml
 
-RUN gradle installDist --no-daemon
+RUN gradle :app:installDist --no-daemon --parallel
 
 # -----------
 
-FROM eclipse-temurin:23
+FROM eclipse-temurin:24
 
 WORKDIR /app/gdlbot
-COPY --from=builder /home/gradle/gdlbot/build/install/gdlbot /app/gdlbot
+COPY --from=builder /home/gradle/gdlbot/app/build/install/app /app/gdlbot
 COPY config.json .
 
 ENTRYPOINT ["bin/gdlbot"]

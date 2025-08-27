@@ -6,12 +6,6 @@
 
 package razesoldier.gdlbot;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import razesoldier.gdlbot.translation.TranslationPipeline;
-import razesoldier.gdlbot.translation.Translator;
-import razesoldier.gdlbot.translation.TranslatorFactory;
-
 import java.util.logging.Logger;
 
 /**
@@ -24,24 +18,6 @@ public final class Services {
 
     public Config getConfig() {
         return config;
-    }
-
-    /**
-     * 获得默认的翻译器
-     */
-    @NotNull
-    @Contract(value = " -> new", pure = true)
-    public Translator getTranslator() {
-        return TranslatorFactory.make();
-    }
-
-    /**
-     * 获得新的翻译管道
-     */
-    @NotNull
-    @Contract(" -> new")
-    public TranslationPipeline getTranslationPipeline() {
-        return new TranslationPipeline();
     }
 
     /**

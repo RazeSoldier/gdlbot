@@ -1,6 +1,6 @@
 /.idea
 /.gradle
-/build
+**/build
 /cache
 /config.json
 /gradle/wrapper/gradle-wrapper.jar

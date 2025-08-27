@@ -7,6 +7,7 @@
 package razesoldier.gdlbot;
 
 import org.jetbrains.annotations.NotNull;
+import razesoldier.gdlbot.translation.TranslationPipeline;
 import razesoldier.gdlbot.translation.TranslatorFactory;
 
 /**
@@ -36,8 +37,7 @@ public class PingNotification {
 
     @NotNull
     private String translate(@NotNull String source) {
-        return Services.getInstance()
-                .getTranslationPipeline()
+        return new TranslationPipeline()
                 .addTranslator(TranslatorFactory.makeTencentTranslator())
                 .translate(source);
     }
