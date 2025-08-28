@@ -7,6 +7,8 @@
 package razesoldier.gdlbot;
 
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,8 +29,13 @@ public class PHBlacklistContentHandler implements HttpResponse.BodyHandler<Suppl
     @Override
     public BodySubscriber<Supplier<Map<String, BlacklistEntity>>> apply(HttpResponse.ResponseInfo responseInfo) {
         var upstream = BodySubscribers.ofString(StandardCharsets.UTF_8);
-        return BodySubscribers.mapping(upstream, s -> () -> {
-            Document rootDocument = Jsoup.parse(s);
+        return BodySubscribers.mapping(upstream, PHBlacklistContentHandler::parseBlacklistFromHtml);
+    }
+
+    @Contract(pure = true)
+    private static @NotNull Supplier<Map<String, BlacklistEntity>> parseBlacklistFromHtml(String html) {
+        return () -> {
+            Document rootDocument = Jsoup.parse(html);
             Element tableBody = rootDocument.getElementsByTag("tbody").first();// 首先获得黑名单列表的表格
             if (tableBody == null) {
                 throw new DOMException("Failed to find tbody element");
@@ -41,6 +48,6 @@ public class PHBlacklistContentHandler implements HttpResponse.BodyHandler<Suppl
                 map.put(columns.get(0).text(), new BlacklistEntity(columns.get(0).text(), columns.get(1).text(), columns.get(2).text(), columns.get(3).text()));
             }
             return ImmutableMap.copyOf(map);
-        });
+        };
     }
 }
