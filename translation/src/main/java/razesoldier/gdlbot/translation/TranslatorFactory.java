@@ -27,7 +27,7 @@ public class TranslatorFactory {
     }
 
     @NotNull
-    public static TencentTranslator makeTencentTranslator() {
+    public static Translator makeTencentTranslator() {
         TencentTranslator instance = getInjector().getInstance(TencentTranslator.class);
         var termRepoIds = Services.getInstance().getConfig().termRepoIDs();
         if (termRepoIds != null) {
@@ -46,7 +46,7 @@ public class TranslatorFactory {
 
     @NotNull
     @Contract(" -> new")
-    public static EVEProperNounsTranslator makeEVEProperNounsTranslator() {
+    public static Translator makeEVEProperNounsTranslator() {
         return getInjector().getInstance(EVEProperNounsTranslator.class);
     }
 

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EVEProperNounsTranslatorTests {
     @Test
-    void testBasic() {
+    void testBasic() throws TranslateException {
         Services.setup(null, null);
         var translator = getInstance();
         assertEquals("重导", translator.translate("HML"));
@@ -86,7 +86,7 @@ class EVEProperNounsTranslatorTests {
 
     @NotNull
     @Contract(" -> new")
-    private EVEProperNounsTranslator getInstance() {
+    private Translator getInstance() {
         return TranslatorFactory.makeEVEProperNounsTranslator();
     }
 }

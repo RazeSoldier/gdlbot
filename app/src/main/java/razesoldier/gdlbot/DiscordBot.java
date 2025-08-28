@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 负责与Discord通讯的机器人
  */
-public class DiscordBot {
+class DiscordBot {
     private final DiscordClient client;
     private GDLBot gdlBot;
 
