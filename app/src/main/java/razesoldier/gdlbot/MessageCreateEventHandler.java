@@ -112,7 +112,7 @@ public class MessageCreateEventHandler implements Runnable {
      * 处理消息中图片链接
      */
     private static String handleImageLink(String message, List<InputStream> inputStreams) {
-        Pattern pattern = Pattern.compile("https+://.*?\\.gif");
+        Pattern pattern = Pattern.compile("https+://.*?\\.gif\\??[\\w&=]*");
         Matcher matcher = pattern.matcher(message);
         while (matcher.find()) {
             inputStreams.add(RemoteFileUtil.getInputStream(matcher.group()));
