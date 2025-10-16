@@ -6,6 +6,7 @@
 
 package razesoldier.gdlbot;
 
+import com.typesafe.config.ConfigFactory;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -18,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -84,18 +86,8 @@ class MessageCreateEventHandlerTest {
     }
 
     private static void mockTestServices() {
-        Services.setup(new Config(
-                null,
-                null,
-                null,
-                new Config.Proxy("socks5", "127.0.0.1", 21881),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                System.getenv("IMGUR_CLIENT_ID")
-        ), Logger.getGlobal());
+        Map<String, Object> fakeConfigMap = Map.of("discordBotToken", "test", "ph.site.cookie", "test", "adminContact", 1);
+        var fakeConfig = new Config(ConfigFactory.parseMap(fakeConfigMap));
+        Services.setup(fakeConfig, Logger.getGlobal());
     }
 }

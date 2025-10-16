@@ -79,7 +79,7 @@ class GDLBot {
                 return false;
             }
 
-            return config.messageSubscribeList().contains(getSenderFromEvent((MessageEvent) event).getId());
+            return config.getCommandSubscribeList().contains(getSenderFromEvent((MessageEvent) event).getId());
         }).subscribeAlways(MessageEvent.class, messageEvent -> {
             logger.info(String.format("Received a message from %s", messageEvent.getSender().getId()));
             Command command = commandFactory.newFromMessage(messageEvent.getMessage());

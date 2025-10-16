@@ -30,10 +30,10 @@ public class CommandFactory {
             return new EmptyCommand();
         }
         if (msg.equals(".event")) {
-            return new GetUpcomingEventCommand(logger, config.phSiteCookie());
+            return new GetUpcomingEventCommand(logger, config.getPhSiteCookie());
         }
         if (msg.startsWith(".bl ")) {
-            return new QueryBlacklistCommand(msg.trim().substring(4), config.phSiteCookie(), logger);
+            return new QueryBlacklistCommand(msg.trim().substring(4), config.getPhSiteCookie(), logger);
         }
         return new EmptyCommand();
     }

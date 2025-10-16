@@ -10,6 +10,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import razesoldier.gdlbot.Config;
 import razesoldier.gdlbot.Services;
 
 /**
@@ -29,16 +30,19 @@ public class TranslatorFactory {
     @NotNull
     public static Translator makeTencentTranslator() {
         TencentTranslator instance = getInjector().getInstance(TencentTranslator.class);
-        var termRepoIds = Services.getInstance().getConfig().termRepoIDs();
-        if (termRepoIds != null) {
-            for (String id : termRepoIds) {
-                instance.addTermRepo(id);
+        Config.TencentCloudTranslationSetting tencentCloudTranslationSetting = Services.getInstance().getConfig().getTencentCloudTranslationSetting();
+        if (tencentCloudTranslationSetting.hasAdvancedSetting()) {
+            var termRepoIds = tencentCloudTranslationSetting.termRepoIDs();
+            if (termRepoIds != null) {
+                for (String id : termRepoIds) {
+                    instance.addTermRepo(id);
+                }
             }
-        }
-        var sentRepoIds = Services.getInstance().getConfig().sentRepoIDs();
-        if (sentRepoIds != null) {
-            for (String id : sentRepoIds) {
-                instance.addSentRepo(id);
+            var sentRepoIds = tencentCloudTranslationSetting.sentRepoIDs();
+            if (sentRepoIds != null) {
+                for (String id : sentRepoIds) {
+                    instance.addSentRepo(id);
+                }
             }
         }
         return instance;

@@ -35,7 +35,7 @@ class DiscordBot {
         var resources = ReactorResources.builder()
                 .httpClient(RemoteFileUtil.httpClient()) // 为DiscordClient设置自定义的HttpClient
                 .build();
-        client = DiscordClientBuilder.create(config.discordBotToken()).setReactorResources(resources).build();
+        client = DiscordClientBuilder.create(config.getDiscordBotToken()).setReactorResources(resources).build();
     }
 
     public void run() {
@@ -44,7 +44,7 @@ class DiscordBot {
         Services.getInstance().getLogger().info("Try login to gateway");
         Mono<Void> login = client.gateway()
                 // 手动设置gateway的配置
-                .setGatewayReactorResources(reactorResources -> GatewayReactorResources.builder(client.getCoreResources().getReactorResources()).build())
+                .setGatewayReactorResources(_ -> GatewayReactorResources.builder(client.getCoreResources().getReactorResources()).build())
                 .withGateway(gateway -> {
                     Mono<Void> handleMessageCreate = gateway.on(MessageCreateEvent.class, event -> Mono.fromRunnable(new MessageCreateEventHandler(event, gdlBot, discordMsgMapQQMSg, memberCache))).then();
                     Mono<Void> handleMessageDelete = gateway.on(MessageDeleteEvent.class, event -> Mono.fromRunnable(new MessageDeleteEventHandler(event, discordMsgMapQQMSg))).then();

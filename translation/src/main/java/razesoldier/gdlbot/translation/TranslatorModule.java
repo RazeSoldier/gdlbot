@@ -64,8 +64,8 @@ class TranslatorModule extends AbstractModule {
 
     @Provides
     @TencentCredential
-    Config.TencentCredential provideTencentCredential() {
-        return config.tencentCred();
+    Config.TencentCloudTranslationSetting.Credential provideTencentCredential() {
+        return config.getTencentCloudTranslationSetting().credential();
     }
 
     @Qualifier

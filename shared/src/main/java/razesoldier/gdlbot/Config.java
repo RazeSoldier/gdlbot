@@ -1,59 +1,159 @@
 /*
   Author: RazeSoldier (razesoldier@outlook.com)
   License: AGPLv3
-  Use Mirai https://github.com/mamoe/mirai
+  Use Mirai && Overflow https://github.com/mamoe/mirai && https://github.com/MrXiaoM/Overflow
  */
 
 package razesoldier.gdlbot;
 
+import com.typesafe.config.ConfigBeanFactory;
+import com.typesafe.config.ConfigObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 本机器人配置文件的数据模型
- * @param messageSubscribeList 订阅指定QQ群（处理命令）
- * @param phSiteCookie www.pandemic-horde.org的`remember_web_*`cookie，用于模拟真实用户的访问
- * @param tencentCred 腾讯云的认证凭据，用来访问腾讯云的机器翻译服务
- * @param proxy Discord机器人的代理配置
- * @param discordBotToken Discord机器人的令牌
- * @param relays Discord机器人的转发配置
- * @param adminContact 机器人管理员的QQ号（可以用于接受错误消息）
- * @param termRepoIDs 指定腾讯云翻译时使用词库的ID列表
- * @param sentRepoIDs 指定腾讯云翻译时使用例句库的ID列表
- * @param imgurClientId Imgur Api的客户端ID，用于请求Imgur Api
+ * 应用程序配置类<br>
+ * 字段标记为{@link NotNull @NotNull}的字段必须在配置文件中存在，否则会抛出异常
  */
-public record Config(
-        List<Long> messageSubscribeList,
-        String phSiteCookie,
-        TencentCredential tencentCred,
-        Proxy proxy,
-        String discordBotToken,
-        List<DiscordRelay> relays,
-        Long adminContact,
-        String qqProtocolVersion,
-        List<String> termRepoIDs,
-        List<String> sentRepoIDs,
-        String imgurClientId
-) {
-    public record TencentCredential(String secretId, String secretKey, String region, Long projectId) {
+public class Config {
+    @NotNull private final String discordBotToken;
+    @NotNull private final String phSiteCookie;
+    @Nullable private List<Long> commandSubscribeList;
+    @Nullable private ProxySetting proxySetting;
+    private final com.typesafe.config.Config innerConfig;
+    @Nullable private TencentCloudTranslationSetting tencentCloudTranslationSetting;
+    @Nullable private List<DiscordRelaySetting> discordRelaySettings;
+    @Nullable private String imgurClientId;
+    @NotNull private final Long adminContact;
+
+    public Config(@NotNull com.typesafe.config.Config config) {
+        this.discordBotToken = config.getString("discordBotToken");
+        this.phSiteCookie = config.getString("ph.site.cookie");
+        this.adminContact = config.getLong("adminContact");
+        this.innerConfig = config;
     }
 
-    /**
-     * @param type 代理类型，可允许的值为：http和socks5，如果未指定则默认为socks5
-     * @param host 代理IP
-     * @param port 代理端口
-     */
-    public record Proxy(String type, String host, Integer port) {
-        public Proxy {
-            if (type == null) {
-                type = "socks5";
-            }
+    @NotNull
+    public static Config initFromConfig(@NotNull com.typesafe.config.Config config) {
+        return new Config(config);
+    }
+
+    @NotNull
+    public String getDiscordBotToken() {
+        return discordBotToken;
+    }
+
+    @NotNull
+    public String getPhSiteCookie() {
+        return phSiteCookie;
+    }
+
+    public List<Long> getCommandSubscribeList() {
+        if (commandSubscribeList == null && innerConfig.hasPath("messageSubscribeList")) {
+            commandSubscribeList = innerConfig.getLongList("messageSubscribeList");
+        }
+        return commandSubscribeList;
+    }
+
+    public ProxySetting getProxySetting() {
+        if (proxySetting == null && innerConfig.hasPath("proxy.host") && innerConfig.hasPath("proxy.port")) {
+            proxySetting = new ProxySetting(
+                    innerConfig.hasPath("proxy.type") ? innerConfig.getString("proxy.type") : "socks5",
+                    innerConfig.getString("proxy.host"),
+                    innerConfig.getInt("proxy.port")
+            );
+        }
+        return proxySetting;
+    }
+
+    public TencentCloudTranslationSetting getTencentCloudTranslationSetting() {
+        if (tencentCloudTranslationSetting == null) {
+            TencentCloudTranslationSetting.Credential credential = new TencentCloudTranslationSetting.Credential(
+                    innerConfig.getString("tencentCloudTranslation.credential.secretId"),
+                    innerConfig.getString("tencentCloudTranslation.credential.secretKey"),
+                    innerConfig.getString("tencentCloudTranslation.credential.region"),
+                    innerConfig.getLong("tencentCloudTranslation.credential.projectId")
+            );
+            tencentCloudTranslationSetting = new TencentCloudTranslationSetting(
+                    credential,
+                    innerConfig.getStringList("tencentCloudTranslation.termRepoIDs"),
+                    innerConfig.getStringList("tencentCloudTranslation.sentRepoIDs")
+            );
+        }
+        return tencentCloudTranslationSetting;
+    }
+
+    public List<DiscordRelaySetting> getDiscordRelaySettings() {
+        if (discordRelaySettings == null) {
+            List<DiscordRelaySetting> list = new ArrayList<>();
+            innerConfig.getList("relays").forEach(item -> {
+                if (item instanceof ConfigObject object) {
+                    DiscordRelaySetting relaySetting = ConfigBeanFactory.create(object.toConfig(), DiscordRelaySetting.class);
+                    list.add(relaySetting);
+                }
+            });
+            discordRelaySettings = list;
+        }
+        return discordRelaySettings;
+    }
+
+    @Nullable
+    public String getImgurClientId() {
+        if (imgurClientId == null) {
+            imgurClientId = innerConfig.getString("imgurClientId");
+        }
+        return imgurClientId;
+    }
+
+    public Boolean hasImgurClientId() {
+        return imgurClientId != null;
+    }
+
+    @NotNull
+    public Long getAdminContact() {
+        return adminContact;
+    }
+
+    public record ProxySetting(String type, String host, Integer port) {}
+
+    public record TencentCloudTranslationSetting(Credential credential, List<String> termRepoIDs, List<String> sentRepoIDs) {
+        public record Credential(String secretId, String secretKey, String region, Long projectId) {
+        }
+
+        public boolean hasAdvancedSetting() {
+            return termRepoIDs != null || sentRepoIDs != null;
         }
     }
 
-    /**
-     * @param discordChannels 需要转发的频道列表
-     * @param downstreamGroups 指定转发的目标QQ群
-     */
-    public record DiscordRelay(List<Long> discordChannels, List<Long> downstreamGroups) {
+    public static class DiscordRelaySetting {
+        private List<Long> discordChannels;
+        private List<Long> downstreamGroups;
+
+        public List<Long> getDiscordChannels() {
+            return discordChannels;
+        }
+
+        public void setDiscordChannels(List<Long> discordChannels) {
+            this.discordChannels = discordChannels;
+        }
+
+        public List<Long> getDownstreamGroups() {
+            return downstreamGroups;
+        }
+
+        public void setDownstreamGroups(List<Long> downstreamGroups) {
+            this.downstreamGroups = downstreamGroups;
+        }
+
+        @Override
+        public String toString() {
+            return "DiscordRelaySetting{" +
+                    "discordChannels=" + discordChannels +
+                    ", downstreamGroups=" + downstreamGroups +
+                    '}';
+        }
     }
 }

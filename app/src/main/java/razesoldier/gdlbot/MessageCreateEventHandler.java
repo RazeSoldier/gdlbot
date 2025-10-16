@@ -39,7 +39,7 @@ public class MessageCreateEventHandler implements Runnable {
     private final GDLBot gdlBot;
     private final Map<Snowflake, List<MessageReceipt<Group>>> discordMsgMapQQMSg;
     private final Map<Snowflake, Member> memberCache;
-    private final List<Config.DiscordRelay> discordRelayConfig;
+    private final List<Config.DiscordRelaySetting> discordRelayConfig;
     private final List<Long> channelWhitelist = new ArrayList<>();
 
     public MessageCreateEventHandler(MessageCreateEvent event,
@@ -50,8 +50,8 @@ public class MessageCreateEventHandler implements Runnable {
         this.gdlBot = gdlBot;
         this.discordMsgMapQQMSg = discordMsgMapQQMSg;
         this.memberCache = memberCache;
-        discordRelayConfig = Services.getInstance().getConfig().relays();
-        discordRelayConfig.forEach(discordRelay -> channelWhitelist.addAll(discordRelay.discordChannels()));
+        discordRelayConfig = Services.getInstance().getConfig().getDiscordRelaySettings();
+        discordRelayConfig.forEach(discordRelay -> channelWhitelist.addAll(discordRelay.getDiscordChannels()));
     }
 
     @Override
@@ -95,9 +95,9 @@ public class MessageCreateEventHandler implements Runnable {
                             sender.getNickname().orElse(sender.getUsername()),
                             msg
                     ).toString();
-                    for (Config.DiscordRelay relay : discordRelayConfig) {
-                        if (relay.discordChannels().contains(tuple3.getT2().getId().asLong())) {
-                            sendMessageToDownstream(messageReceipts, pendingMessage, inputStreams, relay.downstreamGroups());
+                    for (Config.DiscordRelaySetting relay : discordRelayConfig) {
+                        if (relay.getDiscordChannels().contains(tuple3.getT2().getId().asLong())) {
+                            sendMessageToDownstream(messageReceipts, pendingMessage, inputStreams, relay.getDownstreamGroups());
                         }
                     }
                     try {
@@ -125,7 +125,7 @@ public class MessageCreateEventHandler implements Runnable {
         Pattern pattern = Pattern.compile("https://imgur.com/(\\w*)");
         Matcher matcher = pattern.matcher(message);
         while (matcher.find()) {
-            String link = new ImgurApi(Services.getInstance().getConfig().imgurClientId()).getImageLink(matcher.group(1));
+            String link = new ImgurApi(Services.getInstance().getConfig().getImgurClientId()).getImageLink(matcher.group(1));
             inputStreams.add(RemoteFileUtil.getInputStream(link));
         }
         message = matcher.replaceAll("");
@@ -175,7 +175,7 @@ public class MessageCreateEventHandler implements Runnable {
     }
 
     private Long getAdminContact() {
-        return Services.getInstance().getConfig().adminContact();
+        return Services.getInstance().getConfig().getAdminContact();
     }
 
     /**

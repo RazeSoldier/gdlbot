@@ -24,7 +24,7 @@ class TencentTranslator implements Translator {
     private final List<String> sentRepoIDs = new ArrayList<>();
 
     @Inject
-    TencentTranslator(@NotNull @TranslatorModule.TencentCredential Config.TencentCredential credential) {
+    TencentTranslator(@NotNull @TranslatorModule.TencentCredential Config.TencentCloudTranslationSetting.Credential credential) {
         Credential cred = new Credential(credential.secretId(), credential.secretKey());
         client = new TmtClient(cred, credential.region());
         this.projectId = credential.projectId();

@@ -1,5 +1,5 @@
 plugins {
-    id("java")
+    id("java-library")
 }
 
 repositories {
@@ -7,5 +7,6 @@ repositories {
 }
 
 dependencies {
-
+    implementation(libs.annotations)
+    api(libs.lightbend.config)
 }

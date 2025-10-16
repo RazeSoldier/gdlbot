@@ -60,33 +60,41 @@ public class RemoteFileUtil {
      */
     @NotNull
     public static HttpClient newHttpClient() {
+        HttpClient client = HttpClient.create();
+        return setProxy(client);
+    }
+
+    private static HttpClient setProxy(HttpClient client) {
         String proxyType = System.getenv("PROXY_TYPE");
         String proxyHost;
         Integer proxyPort;
-        // 首先尝试从环境变量中获取代理配置，如果获取不到，则从配置文件中获取代理配置
+        // 首先尝试从环境变量中获取代理配置，如果获取不到，则尝试从配置文件中获取代理配置
         if (proxyType == null) {
-            Config.Proxy proxy = Services.getInstance().getConfig().proxy();
-            proxyType = proxy.type();
-            proxyHost = proxy.host();
-            proxyPort = proxy.port();
+            Config.ProxySetting proxy = Services.getInstance().getConfig().getProxySetting();
+            if (proxy == null) {
+                // 没有配置代理，则使用无代理的HttpClient
+                return client;
+            } else {
+                proxyType = proxy.type();
+                proxyHost = proxy.host();
+                proxyPort = proxy.port();
+            }
         } else {
             proxyHost = System.getenv("PROXY_HOST");
             proxyPort = Integer.valueOf(System.getenv("PROXY_PORT"));
         }
-
-        final String finalProxyType = proxyType;
-        return HttpClient.create()
-                .proxy(typeSpec -> {
-                    ProxyProvider.Proxy type;
-                    if (finalProxyType.equals("socks5")) {
-                        type = ProxyProvider.Proxy.SOCKS5;
-                        Services.getInstance().getLogger().info("Using socks5 proxy");
-                    } else {
-                        type = ProxyProvider.Proxy.HTTP;
-                        Services.getInstance().getLogger().info("Using http proxy");
-                    }
-                    typeSpec.type(type).host(proxyHost).port(proxyPort).build();
-                });
+        String finalProxyType = proxyType;
+        return client.proxy(typeSpec -> {
+            ProxyProvider.Proxy type;
+            if (finalProxyType.equals("socks5")) {
+                type = ProxyProvider.Proxy.SOCKS5;
+                Services.getInstance().getLogger().info("Using socks5 proxy");
+            } else {
+                type = ProxyProvider.Proxy.HTTP;
+                Services.getInstance().getLogger().info("Using http proxy");
+            }
+            typeSpec.type(type).host(proxyHost).port(proxyPort).build();
+        });
     }
 
     private RemoteFileUtil() {}
