@@ -37,8 +37,11 @@ public class PingNotification {
 
     @NotNull
     private String translate(@NotNull String source) {
-        return new TranslationPipeline()
-                .addTranslator(TranslatorFactory.makeTencentTranslator())
-                .translate(source);
+        if (TranslatorFactory.canUseTranslator(Services.getInstance().getConfig())) {
+            return new TranslationPipeline()
+                    .addTranslator(TranslatorFactory.makeTencentTranslator())
+                    .translate(source);
+        }
+        return source;
     }
 }

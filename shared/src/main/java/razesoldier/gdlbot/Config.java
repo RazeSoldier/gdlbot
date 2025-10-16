@@ -86,6 +86,10 @@ public class Config {
         return tencentCloudTranslationSetting;
     }
 
+    public boolean hasTencentCloudTranslationSetting() {
+        return innerConfig.hasPath("tencentCloudTranslation.credential");
+    }
+
     public List<DiscordRelaySetting> getDiscordRelaySettings() {
         if (discordRelaySettings == null) {
             List<DiscordRelaySetting> list = new ArrayList<>();

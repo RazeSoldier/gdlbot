@@ -54,6 +54,16 @@ public class TranslatorFactory {
         return getInjector().getInstance(EVEProperNounsTranslator.class);
     }
 
+    /**
+     * 检查是否可以根据给定的配置使用翻译器。
+     *
+     * @param config 全局应用程序配置对象
+     * @return 如果配置中存在腾讯云翻译凭据，则返回true，否则返回false
+     */
+    public static boolean canUseTranslator(@NotNull Config config) {
+        return config.hasTencentCloudTranslationSetting();
+    }
+
     private static Injector getInjector() {
         if (injector == null) {
             injector = Guice.createInjector(new TranslatorModule());
