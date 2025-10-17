@@ -8,6 +8,7 @@ package razesoldier.gdlbot;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.PartialMember;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,7 +86,7 @@ public class MessageCreateEventHandler implements Runnable {
                     List<InputStream> inputStreams; // 最终要传给sendMessageToDownstream()方法的文件流列表
                     inputStreams = DiscordUtil.attachment2InputStream(message.getAttachments());
                     String msg = normalizedMessageContent(message.getContent());
-                    msg = handleImageLink(msg, inputStreams);
+                    msg = handleEmbedImage(message, msg, inputStreams);
                     try {
                         msg = handleImgurLink(msg, inputStreams);
                     } catch (ImgurApiException e) {
@@ -109,16 +111,32 @@ public class MessageCreateEventHandler implements Runnable {
     }
 
     /**
-     * 处理消息中图片链接
+     * 处理消息体中的图片链接，尝试将图片链接转换成待上传的{@link InputStream}
      */
-    private static String handleImageLink(String message, List<InputStream> inputStreams) {
-        Pattern pattern = Pattern.compile("https+://.*?\\.gif\\??[\\w&=]*");
-        Matcher matcher = pattern.matcher(message);
-        while (matcher.find()) {
-            inputStreams.add(RemoteFileUtil.getInputStream(matcher.group()));
+    private static String handleEmbedImage(@NotNull Message message, String content, List<InputStream> inputStreams) {
+        List<Embed> embeds = message.getEmbeds();
+        if (embeds.isEmpty()) {
+            return content;
         }
-        message = matcher.replaceAll("");
-        return message;
+        AtomicReference<String> ref = new AtomicReference<>(content);
+        embeds.stream()
+                .filter(embed -> embed.getType().equals(Embed.Type.IMAGE))
+                .forEach(embed -> {
+                    if (embed.getUrl().isEmpty()) {
+                        return;
+                    }
+                    String url = embed.getUrl().get();
+                    if (!content.contains(url)) {
+                        return;
+                    }
+                    embed.getThumbnail().map(Embed.Thumbnail::getUrl).ifPresent(thumbUrl -> {
+                        // 如果存在缩略图URL则使用缩略图URL，然后替换掉缩略图URL
+                        inputStreams.add(RemoteFileUtil.getInputStream(thumbUrl));
+                        ref.set(content.replace(url, ""));
+                    });
+                }
+        );
+        return ref.get();
     }
 
     private static String handleImgurLink(String message, List<InputStream> inputStreams) throws ImgurApiException {

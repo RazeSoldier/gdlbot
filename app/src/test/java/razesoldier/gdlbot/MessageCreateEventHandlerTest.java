@@ -62,17 +62,6 @@ class MessageCreateEventHandlerTest {
     }
 
     @Test
-    void testHandleImageLink() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        mockTestServices();
-        Method method = MessageCreateEventHandler.class.getDeclaredMethod("handleImageLink", String.class, List.class);
-        method.setAccessible(true);
-        List<InputStream> inputStreams = new ArrayList<>();
-        String res = (String) method.invoke(null, "https://media.discordapp.net/attachments/702512955400519771/1092917248064245831/Pankrab_Red_2.gif\nhttps://media.discordapp.net/attachments/702512433326981151/1102094056642850826/Pankrab_Green_5.gif", inputStreams);
-        assertEquals("\n", res);
-        assertEquals(2, inputStreams.size());
-    }
-
-    @Test
     @EnabledIfEnvironmentVariable(named = "IMGUR_CLIENT_ID", matches = ".*")
     void testHandleImgurLink() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         mockTestServices();
