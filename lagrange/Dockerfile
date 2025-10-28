@@ -13,4 +13,4 @@ RUN apt-get install --no-install-recommends -y curl \
 
 HEALTHCHECK --interval=10s --timeout=3s CMD /app/data/check_health.sh
 
-EXPOSE 8090
+EXPOSE 8089
