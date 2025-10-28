@@ -74,6 +74,9 @@ class GDLBot {
     }
 
     private void registerMessageSubscribe() {
+        if (config.getCommandSubscribeList() == null) {
+            return;
+        }
         GlobalEventChannel.INSTANCE.filter(event -> {
             if (!(event instanceof MessageEvent)) {
                 return false;
