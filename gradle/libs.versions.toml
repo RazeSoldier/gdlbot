@@ -18,7 +18,7 @@ reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", ve
 overflow = { module = "top.mrxiaom.mirai:overflow-core", version = "1.0.7" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
-discord4j = { module = "com.discord4j:discord4j-core", version = "3.2.8" }
+discord4j = { module = "com.discord4j:discord4j-core", version = "3.3.0" }
 jsoup = { module = "org.jsoup:jsoup", version = "1.18.3" }
 guava = { module = "com.google.guava:guava", version = "33.4.0-jre" } # https://github.com/google/guava
 lightbend-config = { module = "com.typesafe:config", version = "1.4.4" }
