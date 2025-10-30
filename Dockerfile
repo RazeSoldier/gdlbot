@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM gradle:9.0.0-jdk24 AS builder
+FROM gradle:9.2.0-jdk25 AS builder
 
 WORKDIR /home/gradle/gdlbot
 COPY config.json .
@@ -15,7 +15,7 @@ RUN gradle :app:installDist --no-daemon --parallel
 
 # -----------
 
-FROM eclipse-temurin:24
+FROM eclipse-temurin:25
 
 WORKDIR /app/gdlbot
 COPY --from=builder /home/gradle/gdlbot/app/build/install/app /app/gdlbot
