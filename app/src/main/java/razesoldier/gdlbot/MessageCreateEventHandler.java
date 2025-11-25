@@ -10,26 +10,18 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.PartialMember;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.Image;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 处理{@link MessageCreateEvent}
@@ -41,6 +33,7 @@ public class MessageCreateEventHandler implements Runnable {
     private final Map<Snowflake, Member> memberCache;
     private final List<Config.DiscordRelaySetting> discordRelayConfig;
     private final List<Long> channelWhitelist = new ArrayList<>();
+    private final String imgurClientId;
 
     public MessageCreateEventHandler(MessageCreateEvent event,
                                      GDLBot gdlBot,
@@ -50,8 +43,14 @@ public class MessageCreateEventHandler implements Runnable {
         this.gdlBot = gdlBot;
         this.discordMsgMapQQMSg = discordMsgMapQQMSg;
         this.memberCache = memberCache;
-        discordRelayConfig = Services.getInstance().getConfig().getDiscordRelaySettings();
+        Config config = Services.getInstance().getConfig();
+        discordRelayConfig = config.getDiscordRelaySettings();
         discordRelayConfig.forEach(discordRelay -> channelWhitelist.addAll(discordRelay.getDiscordChannels()));
+        if (config.hasImgurClientId()) {
+            imgurClientId = config.getImgurClientId();
+        } else {
+            imgurClientId = null;
+        }
     }
 
     @Override
@@ -85,7 +84,11 @@ public class MessageCreateEventHandler implements Runnable {
                     inputStreams = DiscordUtil.attachment2InputStream(message.getAttachments());
                     String content = normalizedMessageContent(message.getContent());
 
-                    ImageLinkProcessor.Result result = new ImageLinkProcessor(content, message).process();
+                    ImageLinkProcessor imageLinkProcessor = new ImageLinkProcessor(content, message);
+                    if (imgurClientId != null) {
+                        imageLinkProcessor.setImgurClientId(imgurClientId);
+                    }
+                    ImageLinkProcessor.Result result = imageLinkProcessor.process();
                     content = result.processedContent();
                     inputStreams.addAll(result.imageInputStreams());
 
@@ -158,50 +161,6 @@ public class MessageCreateEventHandler implements Runnable {
      */
     @NotNull
     private String normalizedMessageContent(@NotNull String content) {
-        content = removeUnsupportedString(content);
-        content = transformMemberId2Name(content);
-        return transformTimeCommand2LocalTime(content);
-    }
-
-    /**
-     * 去掉内容里的不能被本程序处理的特殊字符串
-     */
-    @NotNull
-    @Contract(pure = true)
-    private static String removeUnsupportedString(@NotNull String content) {
-        return content.replaceAll("<a?:.*?:\\d*>", "");
-    }
-
-    /**
-     * 将内容里诸如`<@757265324688277525>`的文本转换成对应的人名
-     */
-    private String transformMemberId2Name(String content) {
-        Matcher matcher = Pattern.compile("<@(\\d*)>").matcher(content);
-        return matcher.replaceAll(matchResult -> "@" + getMemberNameById(Long.valueOf(matchResult.group(1))));
-    }
-
-    /**
-     * 将内容里诸如`&#60;t:1679657400:R>`的文本转换成对应+8时区的时间
-     */
-    private static String transformTimeCommand2LocalTime(String content) {
-        Matcher matcher = Pattern.compile("<t:(\\d*):R>").matcher(content);
-        return matcher.replaceAll(matchResult -> {
-            Instant instant = Instant.ofEpochSecond(Long.parseLong(matchResult.group(1)));
-            return LocalDateTime.ofInstant(instant, ZoneId.of("+8")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        });
-    }
-
-    /**
-     * 根据成员ID获得服务器的成员显示名
-     * @param id 成员ID
-     * @return 返回服务器的成员显示名，如果因为任何原因无法获得则回退成成员ID
-     */
-    private String getMemberNameById(Long id) {
-        return event.getGuild()
-                .blockOptional()
-                .map(guild -> guild.getMemberById(Snowflake.of(id)))
-                .map(Mono::block)
-                .map(PartialMember::getDisplayName)
-                .orElseGet(() -> String.valueOf(id));
+        return new DiscordMarkdownConverter(event.getGuild().block()).convert(content);
     }
 }

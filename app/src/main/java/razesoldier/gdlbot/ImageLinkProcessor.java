@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 public class ImageLinkProcessor {
     private String content;
     private final Message message;
+    private String imgurClientId;
 
     public ImageLinkProcessor(String content, Message message) {
         this.content = content;
@@ -36,11 +37,15 @@ public class ImageLinkProcessor {
     public Result process() {
         List<InputStream> inputStreams = new ArrayList<>();
         handleEmbed(inputStreams);
-        try {
-            handleImgurLink(inputStreams);
-        } catch (ImgurApiException e) {
-            Services.getInstance().getLogger().warning(e.getMessage());
+
+        if (imgurClientId != null) {
+            try {
+                handleImgurLink(inputStreams);
+            } catch (ImgurApiException e) {
+                Services.getInstance().getLogger().warning(e.getMessage());
+            }
         }
+
         return new Result(inputStreams, content);
     }
 
@@ -68,7 +73,7 @@ public class ImageLinkProcessor {
         Pattern pattern = Pattern.compile("https://imgur.com/(\\w*)");
         Matcher matcher = pattern.matcher(content);
         while (matcher.find()) {
-            String link = new ImgurApi(Services.getInstance().getConfig().getImgurClientId()).getImageLink(matcher.group(1));
+            String link = new ImgurApi(imgurClientId).getImageLink(matcher.group(1));
             inputStreams.add(RemoteFileUtil.getInputStream(link));
         }
         content = matcher.replaceAll("");
@@ -77,6 +82,10 @@ public class ImageLinkProcessor {
     @NotNull
     private String getFilenameFromUri(@NotNull String uri) {
         return Path.of(URI.create(uri).getPath()).getFileName().toString();
+    }
+
+    public void setImgurClientId(String imgurClientId) {
+        this.imgurClientId = imgurClientId;
     }
 
     public record Result(List<InputStream> imageInputStreams, String processedContent) {

@@ -112,7 +112,7 @@ public class Config {
         return imgurClientId;
     }
 
-    public Boolean hasImgurClientId() {
+    public boolean hasImgurClientId() {
         return imgurClientId != null;
     }
 
